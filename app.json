@@ -14,10 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "io.market.nativebase.geekyants.datingappui"
+      "bundleIdentifier": "com.crowdbotics.ofone"
     },
     "android": {
-      "package": "io.market.nativebase.geekyants.datingappui"
+      "package": "com.crowdbotics.ofone"
     },
     "androidStatusBarColor": "#EEE",
     "androidStatusBar": {

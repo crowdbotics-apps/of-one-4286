@@ -11,15 +11,7 @@ var config = {
   messagingSenderId: "57293716288",
   appId: "1:57293716288:web:f16509fc4c643544"
 };
-// var config = {
-//     apiKey: "AIzaSyAkoMIMF65nm9c1vKU52Uyw-8BK3LdPjm8",
-//     authDomain: "eastwest-3340.firebaseapp.com",
-//     databaseURL: "https://eastwest-3340.firebaseio.com",
-//     projectId: "eastwest-3340",
-//     storageBucket: "eastwest-3340.appspot.com",
-//     messagingSenderId: "720515782995",
-//     appId: "1:720515782995:web:33e1c839f49e01ae"
-//   };
+
 
 firebase.initializeApp(config);
 
