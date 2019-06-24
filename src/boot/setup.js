@@ -22,8 +22,8 @@ export default class Setup extends Component {
   }
   async componentWillMount() {
     await Expo.Font.loadAsync({
-      Roboto: require("native-base/Fonts/Roboto.ttf"),
-      Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),
+      Roboto: require("../../node_modules/native-base/Fonts/Roboto.ttf"),
+      Roboto_medium: require("../../node_modules/native-base/Fonts/Roboto_medium.ttf"),
       arial: require("../../Fonts/Arial.ttf")
     });
     this.setState({ isReady: true });

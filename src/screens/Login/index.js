@@ -4,10 +4,20 @@ import { Container, Content, Text, Button, View } from "native-base";
 import Swiper from "react-native-swiper";
 import styles from "./styles";
 import commonColor from "../../theme/variables/commonColor";
+import {signInWithFacebook} from '../../services/Authentication'
+import {alert} from '../../services/Alert'
 
 var deviceHeight = Dimensions.get("window").height;
 
 class Login extends Component {
+  onLoginWithFB = async () => {
+    const res = await signInWithFacebook()
+    if(res.type == 'success')
+      this.props.navigation.navigate("HomeTabNavigation");
+    else 
+      alert('Login failed!')
+  };
+
   render() {
     return (
       <Container style={{ backgroundColor: "#fff" }}>
@@ -95,7 +105,7 @@ class Login extends Component {
             block
             rounded
             style={styles.loginBtn}
-            onPress={() => this.props.navigation.navigate("HomeTabNavigation")}
+            onPress={this.onLoginWithFB}
           >
             <Text style={styles.loginBtnText}>LOG IN WITH FACEBOOK</Text>
           </Button>
