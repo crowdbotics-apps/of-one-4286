@@ -8,6 +8,7 @@ import getTheme from "../theme/components";
 import variables from "../theme/variables/commonColor";
 import { PersistGate } from "redux-persist/integration/react";
 import { SafeAreaView } from "react-native";
+import store from "../redux/store";
 
 const storeObj = {};
 export default class Setup extends Component {
@@ -36,10 +37,10 @@ export default class Setup extends Component {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <StyleProvider style={getTheme(variables)}>
-          <Provider store={this.state.store.store}>
-            <PersistGate persistor={this.state.store.persistor}>
+          <Provider store={store}>
+           
               <App />
-            </PersistGate>
+           
           </Provider>
         </StyleProvider>
       </SafeAreaView>

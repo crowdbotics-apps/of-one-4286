@@ -46,7 +46,7 @@ export const signInWithFacebook = async () => {
           name: displayName,
           age: 0,
           college: "",
-          image: photoURL,
+          image: '',
           num: 0,
           email,
           fb_uid: providerData[0].uid,

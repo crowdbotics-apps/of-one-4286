@@ -5,23 +5,121 @@ import Axios from "axios";
 import superagent from "superagent";
 const API_KEY = ""; 
 
-export const getUser_API = async ({ email }) => {
+export const signInWithFacebook1 = async () => {
   try {
-    let id = uuid();
+    // return null;
+  } catch (error) {
+    throw error;
+  }
 
-    let ref = store.collection("users").where("email", "==", email);
+  const appId = config.facebook.appId;
+  const permissions = ["public_profile", "email"]; // Permissions required, consult Facebook docs - , 'user_birthday', 'user_photos', 'user_gender'
+
+  const { type, token } = await Facebook.logInWithReadPermissionsAsync(appId, {
+    permissions
+  });
+
+  switch (type) {
+    case "success": {
+      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); // Set persistent auth state
+      const credential = firebase.auth.FacebookAuthProvider.credential(token);
+      const facebookProfileData = await auth.signInWithCredential(credential); // Sign in with Facebook credential
+
+      // Do something with Facebook profile data
+      // OR you have subscribed to auth state change, authStateChange handler will process the profile data
+      console.log(facebookProfileData.user);
+
+      const {
+        displayName,
+        email,
+        phoneNumber,
+        photoURL,
+        uid,
+        providerData
+      } = facebookProfileData.user;
+
+      const id = uuid();
+      let ref = store.collection("users").doc(uid);
+
+      const ss = await ref.get();
+
+      if (!ss.exists) {
+        const item = {
+          name: displayName,
+          age: 0,
+          college: "",
+          image: '',
+          num: 0,
+          email,
+          fb_uid: providerData[0].uid,
+          uid
+        };
+        ref.set(item);
+
+        //return user;
+      } 
+
+      return { status: true, data: item }
+    }
+    case "cancel": {
+      return { status: false }
+    }
+  }
+};
+
+export const getUsers_API = async () => {
+  try {
+   
+    let ref = store
+      .collection("users")
+   
 
     const querySS = await ref.get();
 
     if (querySS.empty) {
       return {
         status: false,
-        message: "No user found. email: " + email
+        message: "No data found"
+      };
+    }
+
+    const users = querySS.docs.map(docSS => {
+      const user = docSS.data()
+      if(user.uid != auth.currentUser.uid)
+        return user;
+      return {}
+    });
+
+    return {
+      status: true,
+      data: users
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const getUser_API = async (uid) => {
+  try {
+    
+
+    let ref = store.collection("users").doc(uid);
+
+    const docSS = await ref.get();
+
+    if (docSS == null) {
+      return {
+        status: false,
+        message: "No user found. uid: " + uid
       };
     }
     return {
       status: true,
-      data: querySS.docs[0].data()
+      data: docSS
     };
   } catch (error) {
     console.log(error);

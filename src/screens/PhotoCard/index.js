@@ -11,29 +11,70 @@ import {
   Icon,
   Button,
   Right,
-  Body
+  Body,
+  Spinner
 } from "native-base";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
 import data from "./data";
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../actions";
+
 
 class PhotoCard extends Component {
   constructor(props) {
     super(props);
     this.state = {
       direction: null,
-      opac: 0
+      opac: 0,
+      users: [],
     };
   }
 
+  async componentDidMount(){
+    const resUsers = await API.getUsers_API();
+    let users = [];
+    if (resUsers.status) {
+      users = resUsers.data;
+      
+      this.setState({users})
+    }
+  }
+
+  onRefresh = () => {
+
+  }
+
+  onLike = () => {
+
+  }
+
+  onUnLike = () => {
+
+  }
+
+  onSuperLike = () => {
+
+  }
+
   render() {
+    const { users } = this.state
+    const data1 = users.filter(item => item.uid != null) 
+    console.log(data1)
     const navigation = this.props.navigation;
+    if(data1.length == 0)
+      return <Spinner />
+
+    if(data1.length < 2)
+      return <Text>No user found.</Text>
+
     return (
       <Container style={styles.wrapper}>
         <View style={styles.deckswiperView}>
           <DeckSwiper
             activeOpacity={1}
-            dataSource={data}
+            dataSource={data1}
             ref={mr => (this._deckSwiper = mr)}
             onSwiping={(dir, opa) =>
               this.setState({ direction: dir, opac: opa })}
@@ -46,7 +87,7 @@ class PhotoCard extends Component {
                   cardBody
                   onPress={() => navigation.navigate("PhotoCardDetails")}
                 >
-                  <ImageBackground style={styles.cardMain} source={item.image}>
+                  <ImageBackground style={styles.cardMain} source={item.uid == null ? item.image : item.image != '' ? {uri: item.image} : require('../../../assets/launchscreen.png')}>
                     {this.state.direction === "left" &&
                       <View
                         style={{
@@ -117,7 +158,7 @@ class PhotoCard extends Component {
                 >
                   <Body>
                     <Text style={styles.text}>
-                      {item.name}, {item.age}
+                      {item.name}
                     </Text>
                     <Text style={styles.subtextLeft}>
                       {item.college}
@@ -143,7 +184,7 @@ class PhotoCard extends Component {
                   }}
                   cardBody
                 >
-                  <Image style={styles.cardMain} source={item.image} />
+                  <Image style={styles.cardMain} source={item.uid == null ? item.image : item.image != '' ? {uri: item.image} : require('../../../assets/launchscreen.png')} />
                 </CardItem>
                 <CardItem
                   style={{
@@ -153,7 +194,7 @@ class PhotoCard extends Component {
                 >
                   <Body>
                     <Text style={styles.text}>
-                      {item.name}, {item.age}
+                      {item.name}
                     </Text>
                     <Text style={styles.subtextLeft}>
                       {item.college}
@@ -237,4 +278,12 @@ class PhotoCard extends Component {
   }
 }
 
-export default PhotoCard;
+
+export default connect(
+  state => ({
+    
+  }),
+  {
+   
+  }
+)(PhotoCard);
