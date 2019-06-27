@@ -1,4 +1,29 @@
 {
-  "name": "of_one_4286",
-  "displayName": "of_one_4286"
+  "expo": {
+    "sdkVersion": "33.0.0",
+    "icon": "./assets/DefaultIcon.png",
+    "slug": "strapdatingapp",
+    "splash": {
+      "image": "./assets/launchscreen.png",
+      "resizeMode": "cover"
+    },
+    "orientation": "portrait",
+    "primaryColor": "#cccccc",
+    "packagerOpts": {
+      "assetExts": ["ttf"]
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.crowdbotics.ofone"
+    },
+    "android": {
+      "package": "com.crowdbotics.ofone"
+    },
+    "androidStatusBarColor": "#EEE",
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#EEE"
+    }
+    
+  }
 }
