@@ -20,6 +20,7 @@ import data from "./data";
 import * as API from "../../services/Api";
 import { connect } from "react-redux";
 import * as Actions from "../../actions";
+import { Constants, Location, Permissions } from "expo";
 
 
 class PhotoCard extends Component {
@@ -32,7 +33,24 @@ class PhotoCard extends Component {
     };
   }
 
+  _getLocationAsync = async () => {
+    
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== "granted") {
+      this.setState({
+        locationResult: "Permission to access location was denied"
+      });
+    } else {
+      this.setState({ hasLocationPermissions: true });
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    console.log(location);
+  }
+
   async componentDidMount(){
+    await this._getLocationAsync()
+
     const resUsers = await API.getUsers_API();
     let users = [];
     if (resUsers.status) {
