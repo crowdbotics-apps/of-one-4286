@@ -1,6 +1,6 @@
 import firebase from "firebase";
 import "@firebase/firestore";
-
+import {Constants} from 'expo'
 // Initialize Firebase
 var config = {
   apiKey: "AIzaSyAe_giJHXiOz7u2eLTIJSo8VaaQkynmWlY",

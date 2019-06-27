@@ -13,6 +13,7 @@ import EditProfile from "./screens/EditProfile/editprofile";
 import CurrentWork from "./screens/EditProfile/currentWork";
 import School from "./screens/EditProfile/school";
 import AddPhoto from "./screens/EditProfile/addphoto";
+import Loading from "./screens/Loading";
 
 const App = createStackNavigator(
   {
@@ -26,11 +27,12 @@ const App = createStackNavigator(
     AddPhoto: { screen: AddPhoto },
     CurrentWork: { screen: CurrentWork },
     School: { screen: School },
-    PhotoCardDetails: { screen: PhotoCardDetails }
+    PhotoCardDetails: { screen: PhotoCardDetails },
+    Loading: { screen: Loading },
   },
   {
     index: 0,
-    initialRouteName: "Login",
+    initialRouteName: "Loading",
     headerMode: "none"
   }
 );
