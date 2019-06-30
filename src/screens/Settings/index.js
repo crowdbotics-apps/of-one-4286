@@ -130,7 +130,7 @@ class Settings extends Component {
                 <Slider
                   style={{ margin: 10 }}
                   onValueChange={value => this.setState({ sliderValue: value })}
-                  maximumValue={100}
+                  maximumValue={50}
                   minimumTrackTintColor={commonColor.brandPrimary}
                   step={1}
                 />
@@ -189,9 +189,9 @@ class Settings extends Component {
                 </Text>
               </CardItem>
             </Card> */}
-            <View style={{ marginVertical: 10 }}>
+            {/* <View style={{ marginVertical: 10 }}>
               <Text style={styles.text}>App Settings</Text>
-            </View>
+            </View> */}
             {/* <View>
               <Card style={{ borderRadius: 5 }}>
                 <CardItem style={{ borderRadius: 5 }}>
@@ -264,7 +264,7 @@ class Settings extends Component {
               </Card>
             </View> */}
 
-            <View style={{ marginVertical: 10 }}>
+            {/* <View style={{ marginVertical: 10 }}>
               <Card style={styles.card}>
                 <CardItem style={styles.cardItemHeaderView}>
                   <Left>
@@ -325,7 +325,7 @@ class Settings extends Component {
                   </Button>
                 </CardItem>
               </Card>
-            </View>
+            </View> */}
 
             <View style={{ marginVertical: 10 }}>
               <Text style={styles.text}>Contact Us</Text>

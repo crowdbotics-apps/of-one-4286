@@ -63,8 +63,8 @@ class PhotoCardDetails extends Component {
           </View>
           <View style={styles.subTextView}>
             <Text style={styles.nameText}>Rachel McAdams, 26</Text>
-            <Text style={styles.workingText}>Model, Actress</Text>
-            <Text style={styles.distanceAwayText}>3 km away</Text>
+            {/* <Text style={styles.workingText}>Model, Actress</Text> */}
+            {/* <Text style={styles.distanceAwayText}>3 km away</Text> */}
           </View>
           <View style={styles.quoteView}>
             <Text style={styles.quoteText}>
@@ -73,7 +73,7 @@ class PhotoCardDetails extends Component {
             </Text>
           </View>
           <View style={styles.instagramPhotoCountView}>
-            <Text>200 Instagram Photos</Text>
+            <Text>Photos</Text>
           </View>
           <View>
             <Swiper
@@ -211,7 +211,7 @@ class PhotoCardDetails extends Component {
             </Swiper>
           </View>
           {/*here*/}
-          <View style={styles.interestTextHeadingView}>
+          {/* <View style={styles.interestTextHeadingView}>
             <Text>3 interests</Text>
           </View>
           <View style={styles.interestsView}>
@@ -224,7 +224,7 @@ class PhotoCardDetails extends Component {
             <Button bordered style={{ margin: 5 }}>
               <Text style={styles.interestText}> Game of Thrones</Text>
             </Button>
-          </View>
+          </View> */}
         </Content>
         <View>
           <Grid style={styles.bottomPillsView}>

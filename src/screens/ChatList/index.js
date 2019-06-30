@@ -61,9 +61,9 @@ class ChatList extends Component {
                   <Text style={styles.userNameText}>
                     {dataRow.name}
                   </Text>
-                  <Text style={styles.distanceText}>
+                  {/* <Text style={styles.distanceText}>
                     {dataRow.distance}
-                  </Text>
+                  </Text> */}
                 </Body>
               </ListItem>}
           />

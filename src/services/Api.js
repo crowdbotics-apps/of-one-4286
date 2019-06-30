@@ -1,8 +1,13 @@
-import { store, auth } from "../constants/database";
+
+import { store, auth, firebase } from "../constants/database";
+
 import uuid from "uuid";
 import moment from "moment";
 import Axios from "axios";
 import superagent from "superagent";
+import config from "../constants/config";
+import { Facebook } from "expo";
+
 const API_KEY = ""; 
 
 export const signInWithFacebook1 = async () => {
@@ -43,8 +48,10 @@ export const signInWithFacebook1 = async () => {
 
       const ss = await ref.get();
 
+      let item = {}
+
       if (!ss.exists) {
-        const item = {
+        item = {
           name: displayName,
           age: 0,
           college: "",
@@ -54,10 +61,14 @@ export const signInWithFacebook1 = async () => {
           fb_uid: providerData[0].uid,
           uid
         };
+
         ref.set(item);
 
         //return user;
-      } 
+      } else{
+        item = ss.data()
+      }
+      
 
       return { status: true, data: item }
     }
@@ -85,14 +96,16 @@ export const getUsers_API = async () => {
 
     const users = querySS.docs.map(docSS => {
       const user = docSS.data()
-      if(user.uid != auth.currentUser.uid)
+      if(user.uid != auth.currentUser.uid){
+        
         return user;
-      return {}
+      }
+      return null
     });
 
     return {
       status: true,
-      data: users
+      data: users.filter(i => i != null)
     };
   } catch (error) {
     console.log(error);
@@ -119,10 +132,10 @@ export const getUser_API = async (uid) => {
     }
     return {
       status: true,
-      data: docSS
+      data: docSS.data()
     };
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     return {
       status: false,
       message: "ERROR: " + error.message
@@ -267,23 +280,11 @@ export const getMatchingUsersNearby_API = async ({
 
 export const updUser_API = async (email, udpUser) => {
   try {
-    let querySS = await store
-      .collection("users")
-      .where("email", "==", email)
-      .get();
+    let ref = store.collection("users").doc(uid);
 
-    // console.log(querySS, email)
-    if (querySS.empty) {
-      return {
-        status: false,
-        message: "No user found for this email/username: " + email
-      };
-    }
-
-    //console.log(querySS.docs)
-
-    const ref = querySS.docs[0].ref;
-    const data = querySS.docs[0].data();
+  
+    const docSS = await ref.get();
+    const data = docSS.data()
 
     const newUser = {
       ...data,
@@ -323,7 +324,9 @@ export const like_API = async (uid, who, supperLike) => {
       ref.set(item);
     }
 
-    const likes = ref.parent.get().docs.map(docSS => {
+    const querySS = await store.collection("users").doc(uid).collection('likes').get()
+
+    const likes = querySS.docs.map(docSS => {
     
       return docSS.data()
     });
@@ -332,6 +335,96 @@ export const like_API = async (uid, who, supperLike) => {
     return {
       status: true,
       data: likes,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const unlike_API = async (uid, who) => {
+  try {
+    let ref = store.collection("users").doc(uid).collection('unlikes').doc(who.uid);
+
+    const ss = await ref.get();
+
+    if (!ss.exists) {
+      const item = {
+        name: who.name,
+        age: who.age,
+        email: who.email,
+        uid: who.uid,
+
+      };
+      ref.set(item);
+    }
+
+    const querySS = await store.collection("users").doc(uid).collection('unlikes').get()
+
+    const unlikes = querySS.docs.map(docSS => {
+    
+      return docSS.data()
+    });
+
+
+    return {
+      status: true,
+      data: unlikes,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const checkMatch_API = async (uid, who) => {
+  try {
+    let refPerson = store.collection("users").doc(who.uid).collection('likes').doc(uid);
+
+    const ss = await ref.get();
+
+    if (!ss.exists) {
+      const match = {
+        name: who.name,
+        age: who.age,
+        email: who.email,
+        uid: who.uid,
+
+      };
+      let ref = store.collection("users").doc(uid).collection('matchings').doc(who.uid);
+      ref.set(match);
+
+      //reverse 
+      const docMe = await store.collection("users").doc(uid).get()
+      const me = docMe.data()
+      const matchMe = {
+        name: me.name,
+        age: me.age,
+        email: me.email,
+        uid: me.uid,
+
+      };
+      let refPerson = store.collection("users").doc(who.uid).collection('matchings').doc(uid);
+      refPerson.set(matchMe);
+    }
+
+    const querySS = await store.collection("users").doc(uid).collection('matchings').get()
+
+    const matchings = querySS.docs.map(docSS => {
+    
+      return docSS.data()
+    });
+
+
+    return {
+      status: true,
+      data: matchings,
     };
   } catch (error) {
     console.log(error);

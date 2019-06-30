@@ -18,16 +18,16 @@ export const loginFB = async () => {
     return {
       type: ActionType.LOGIN_NOK,
       payload: {
-        message: 'Login failed.'
+        message: "Login failed."
       }
     };
   }
 };
 
-export const getUser = async (uid) => {
+export const getUser = async uid => {
   const res = await API.getUser_API(uid);
 
-  console.log(res);
+  //console.log(res);
 
   if (res.status)
     return {
@@ -64,17 +64,15 @@ export const updateUser = async (email, udpUser) => {
       }
     };
   }
-
 };
 
 //uid - firebase uid - key
 //who is user - object
 //supperLike - bool
 export const like = async (uid, who, supperLike) => {
-  
-    const res = await API.like_API(uid, supperLike);
+  const res = await API.like_API(uid, who, supperLike);
 
-    if (res.status)
+  if (res.status)
     return {
       type: ActionType.UPDATE_LIKE_OK,
       payload: {
@@ -89,5 +87,26 @@ export const like = async (uid, who, supperLike) => {
       }
     };
   }
+};
 
+//uid - firebase uid - key
+//who is user - object
+export const unlike = async (uid, who) => {
+  const res = await API.unlike_API(uid, who);
+
+  if (res.status)
+    return {
+      type: ActionType.UPDATE_UNLIKE_OK,
+      payload: {
+        likes: res.data
+      }
+    };
+  else {
+    return {
+      type: ActionType.UPDATE_UNLIKE_NOK,
+      payload: {
+        message: res.message
+      }
+    };
+  }
 };

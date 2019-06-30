@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { View } from 'react-native';
 import {auth} from '../../constants/database'
 import { success, alert } from '../../utils/Alert';
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
 
 import styles from './style';
@@ -23,6 +25,7 @@ class LoadingScreen extends Component {
         //const userToken = await AsyncStorage.getItem('userToken');
         //console.log('loading user: ', user )
         if (user ) {
+          this.props.getUser(user.uid)
           this.props.navigation.navigate('HomeTabNavigation');
         } else {
           this.props.navigation.navigate('Login');
@@ -46,4 +49,13 @@ class LoadingScreen extends Component {
 }
 
 
-export default LoadingScreen;
+
+export default connect(
+  state => ({
+    user: state.global.user
+  }),
+  {
+    getUser: Actions.getUser,
+   
+  }
+)(LoadingScreen);
