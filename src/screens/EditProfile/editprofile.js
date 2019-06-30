@@ -60,7 +60,7 @@ class EditProfile extends Component {
         <Header>
           <Left>
             <Button transparent onPress={() => navigation.goBack()}>
-              <Icon name="ios-arrow-back-outline" />
+              <Icon name="md-arrow-back" />
             </Button>
           </Left>
           <Body>
@@ -105,7 +105,7 @@ class EditProfile extends Component {
             }}
           >
             <View style={styles.headingView}>
-              <Text style={styles.headingText}>About Federer</Text>
+              <Text style={styles.headingText}>About You</Text>
             </View>
             <View style={styles.textView}>
               <View style={{ marginLeft: 8 }}>
@@ -127,7 +127,7 @@ class EditProfile extends Component {
               </View>
             </View>
           </View>
-          <View style={styles.headingView}>
+          {/* <View style={styles.headingView}>
             <Text style={styles.headingText}>CurrentWork</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate("CurrentWork")}>
@@ -141,11 +141,30 @@ class EditProfile extends Component {
                 World Class Tennis Player
               </Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <View style={styles.headingView}>
             <Text style={styles.headingText}>School</Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("School")}>
+          <View style={styles.textView}>
+              <View style={{ marginLeft: 8 }}>
+                <TextInput
+                  multiline={true}
+                  placeholder="Your school ..."
+                  onChangeText={text => this.setState({ text })}
+                  maxLength={500}
+                  style={[
+                    styles.textArea,
+                    {
+                      height: Math.max(40, this.state.height),
+                      textAlignVertical: "top"
+                    }
+                  ]}
+                  underlineColorAndroid={"transparent"}
+                  value={'JCE, Bangalore'}
+                />
+              </View>
+            </View>
+          {/* <TouchableOpacity onPress={() => navigation.navigate("School")}>
             <View style={styles.textView}>
               <Text
                 style={{
@@ -156,7 +175,7 @@ class EditProfile extends Component {
                 JCE, Bangalore
               </Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <View style={{ marginVertical: 5 }}>
             <View style={styles.headingView}>
               <Text style={styles.headingText}>Gender</Text>
@@ -203,7 +222,7 @@ class EditProfile extends Component {
               </View>
             </TouchableWithoutFeedback>
           </View>
-          <View style={styles.headingView}>
+          {/* <View style={styles.headingView}>
             <Text style={styles.headingText}>Control Your Profile</Text>
           </View>
           <Card
@@ -241,8 +260,8 @@ class EditProfile extends Component {
                 />
               </Right>
             </CardItem>
-          </Card>
-        </Content>
+          </Card>*/}
+        </Content> 
       </Container>
     );
   }

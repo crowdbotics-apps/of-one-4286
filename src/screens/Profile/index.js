@@ -27,12 +27,12 @@ class Profile extends Component {
             </TouchableOpacity>
           </View>
           <View style={styles.profileDescriptionView}>
-            <Text style={styles.nameAndAgeText}>Roger Federer, 32yr</Text>
-            <View style={{ padding: 5 }}>
+            <Text style={styles.nameAndAgeText}>Roger Federer, 32</Text>
+            {/* <View style={{ padding: 5 }}>
               <Text style={styles.workplaceText}>
                 World Class Tennis Player
               </Text>
-            </View>
+            </View> */}
             <Text style={styles.workplaceText}>JCE, Bangalore</Text>
 
             <Button
@@ -48,7 +48,7 @@ class Profile extends Component {
             </Button>
           </View>
         </Content>
-        <View style={styles.goingOutView}>
+        {/* <View style={styles.goingOutView}>
           <View style={styles.goingOutTextView}>
             <Text style={{ fontSize: 18, fontWeight: "500" }}>
               Going Out Tonight?
@@ -68,7 +68,7 @@ class Profile extends Component {
               <Text style={styles.goingOutBtnText}>I'M GOING OUT</Text>
             </Button>
           </View>
-        </View>
+        </View> */}
       </Container>
     );
   }

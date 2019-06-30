@@ -240,7 +240,7 @@ class chatScreen extends Component {
                 transparent
                 onPress={() => this.props.navigation.goBack()}
               >
-                <Icon name="ios-arrow-back" />
+                <Icon name="md-arrow-back" />
               </Button>
             </Left>
             <Body style={{flex:3}}>

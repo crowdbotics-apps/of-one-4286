@@ -67,20 +67,23 @@ export const updateUser = async (email, udpUser) => {
 
 };
 
-export const like = async (email, creditChange) => {
+//uid - firebase uid - key
+//who is user - object
+//supperLike - bool
+export const like = async (uid, who, supperLike) => {
   
-    const res = await API.updCredit_API(email, creditChange);
+    const res = await API.like_API(uid, supperLike);
 
     if (res.status)
     return {
-      type: ActionType.UPDATE_USER_OK,
+      type: ActionType.UPDATE_LIKE_OK,
       payload: {
-        user: res.data
+        likes: res.data
       }
     };
   else {
     return {
-      type: ActionType.GET_USER_NOK,
+      type: ActionType.UPDATE_LIKE_NOK,
       payload: {
         message: res.message
       }

@@ -58,7 +58,7 @@ class PhotoCardDetails extends Component {
               onPress={() => this.props.navigation.goBack()}
               style={styles.backBtn}
             >
-              <Icon name="ios-arrow-back" style={styles.backBtnIcon} />
+              <Icon name="md-arrow-back" style={styles.backBtnIcon} />
             </Button>
           </View>
           <View style={styles.subTextView}>

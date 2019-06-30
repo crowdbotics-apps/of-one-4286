@@ -33,7 +33,7 @@ class ChatList extends Component {
         <Header>
           <Left>
             <Button transparent onPress={() => navigation.goBack()}>
-              <Icon name="ios-arrow-back" />
+              <Icon name="md-arrow-back" />
             </Button>
           </Left>
           <Body>

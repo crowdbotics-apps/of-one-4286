@@ -54,7 +54,7 @@ class Settings extends Component {
         <Header>
           <Left>
             <Button transparent onPress={() => navigation.goBack()}>
-              <Icon name="ios-arrow-back-outline" />
+              <Icon name="md-arrow-back" />
             </Button>
           </Left>
           <Body>
@@ -69,8 +69,8 @@ class Settings extends Component {
             </View>
             <Card>
               <CardItem style={styles.locationSwipperCarditem}>
-                <Text style={styles.cardItemText}>Swiping in</Text>
-                <Text style={styles.textBlue}>My Current Location</Text>
+                <Text style={styles.cardItemText}>Swiping in </Text>
+                <Text style={styles.textBlue}> My Current Location</Text>
               </CardItem>
             </Card>
             <View>
@@ -159,7 +159,7 @@ class Settings extends Component {
               </Text>
             </View>
 
-            <Card style={styles.card}>
+            {/* <Card style={styles.card}>
               <CardItem style={styles.cardItemHeaderView}>
                 <Left>
                   <Text style={styles.redText}>Web Profile</Text>
@@ -188,11 +188,11 @@ class Settings extends Component {
                   the world swipe you right on DatingApp
                 </Text>
               </CardItem>
-            </Card>
+            </Card> */}
             <View style={{ marginVertical: 10 }}>
               <Text style={styles.text}>App Settings</Text>
             </View>
-            <View>
+            {/* <View>
               <Card style={{ borderRadius: 5 }}>
                 <CardItem style={{ borderRadius: 5 }}>
                   <Text style={styles.redText}>Notifications</Text>
@@ -262,7 +262,7 @@ class Settings extends Component {
                   </Right>
                 </CardItem>
               </Card>
-            </View>
+            </View> */}
 
             <View style={{ marginVertical: 10 }}>
               <Card style={styles.card}>

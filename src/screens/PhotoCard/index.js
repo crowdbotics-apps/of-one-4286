@@ -60,20 +60,28 @@ class PhotoCard extends Component {
     }
   }
 
-  onRefresh = () => {
-
+  onRefresh = async () => {
+    const resUsers = await API.getUsers_API();
+    let users = [];
+    if (resUsers.status) {
+      users = resUsers.data;
+      
+      this.setState({users})
+    }
   }
 
   onLike = () => {
-
+    
+    this._deckSwiper._root.swipeRight()
   }
 
   onUnLike = () => {
-
+    this._deckSwiper._root.swipeLeft()
   }
 
   onSuperLike = () => {
-
+    const navigation = this.props.navigation;
+    navigation.navigate("PhotoCardDetails")
   }
 
   render() {
@@ -238,7 +246,7 @@ class PhotoCard extends Component {
         </View>
         <Grid style={styles.bottomGrid}>
           <Row style={styles.bottomRowStyle}>
-            <Button style={styles.bottomRoundedSmallPills}>
+            <Button style={styles.bottomRoundedSmallPills} onPress={this.onRefresh}>
               <Icon
                 name="md-refresh"
                 style={{
@@ -249,7 +257,7 @@ class PhotoCard extends Component {
             </Button>
             <Button
               style={styles.bottomRoundedPills}
-              onPress={() => this._deckSwiper._root.swipeLeft()}
+              onPress={this.onUnLike}
             >
               <Icon
                 name="md-close"
@@ -262,7 +270,7 @@ class PhotoCard extends Component {
             </Button>
             <Button
               style={styles.bottomRoundedPills}
-              onPress={() => this._deckSwiper._root.swipeRight()}
+              onPress={this.onLike}
             >
               <Icon
                 name="md-heart"
@@ -277,7 +285,7 @@ class PhotoCard extends Component {
             </Button>
             <Button
               style={styles.bottomRoundedSmallPills}
-              onPress={() => navigation.navigate("PhotoCardDetails")}
+              onPress={this.onSuperLike}
             >
               <Icon
                 name="md-star"

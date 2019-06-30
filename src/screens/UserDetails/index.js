@@ -71,7 +71,7 @@ class UserDetails extends Component {
               }}
             >
               <Icon
-                name="ios-arrow-back"
+                name="md-arrow-back"
                 style={{
                   fontSize: 30,
                   marginTop: Platform.OS === "ios" ? 5 : undefined,

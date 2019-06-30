@@ -38,7 +38,7 @@ export const signInWithFacebook1 = async () => {
         providerData
       } = facebookProfileData.user;
 
-      const id = uuid();
+      
       let ref = store.collection("users").doc(uid);
 
       const ss = await ref.get();
@@ -175,90 +175,6 @@ export const getUsersNearby_API = async ({ long, lat }) => {
   }
 };
 
-export const getUsersInVenue_API = async ({ long, lat }) => {
-  try {
-    // ~1 mile of lat and lon in degrees
-
-    let ref = store
-      .collection("users")
-      .where("lat", "==", Number(lat))
-      .where("long", "==",  Number(long));
-
-    const querySS = await ref.get();
-
-    if (querySS.empty) {
-      return {
-        status: false,
-        message: "No data found"
-      };
-    }
-
-   
-
-    const users = querySS.docs.map(docSS => {
-      // const user = docSS.data()
-      // if(user != email)
-      return docSS.data();
-    });
-
-    return {
-      status: true,
-      data: users
-    };
-  } catch (error) {
-    console.log(error);
-    return {
-      status: false,
-      message: "ERROR: " + error.message
-    };
-  }
-};
-
-export const getVenueNearby_API = async ({ long, lat }) => {
-  try {
-    // ~1 mile of lat and lon in degrees
-    let lat1 = 0.0144927536231884;
-    let long1 = 0.0181818181818182;
-
-    let lowerLat = lat - lat1 * 10;
-    let lowerLon = long - long1 * 10;
-
-    let greaterLat = lat + lat1 * 10;
-    let greaterLon = long + long1 * 10;
-
-    let ref = store
-      .collection("venues")
-      .where("lat", ">=", lowerLat)
-      .where("lat", "<=", greaterLat);
-
-    const querySS = await ref.get();
-
-    if (querySS.empty) {
-      return {
-        status: false,
-        message: "No data found"
-      };
-    }
-
-    const venues = querySS.docs.map(docSS => {
-      // const user = docSS.data()
-      // if(user != email)
-      return docSS.data();
-    });
-
-    return {
-      status: true,
-      data: venues
-    };
-  } catch (error) {
-    console.log(error);
-    return {
-      status: false,
-      message: "ERROR: " + error.message
-    };
-  }
-};
-
 export const getVenue_API = async ({ long, lat }) => {
   try {
     // ~1 mile of lat and lon in degrees
@@ -348,23 +264,6 @@ export const getMatchingUsersNearby_API = async ({
   }
 };
 
-// {
-//   email,
-//   age,
-//   gender,
-//   genderTarget,
-//   interesting,
-//   ageMin,
-//   ageMax,
-//   dob,
-//   credit,
-//   status,
-//   profile,
-//   type,
-//   long,
-//   lat,
-//   checkInAt,
-// }
 
 export const updUser_API = async (email, udpUser) => {
   try {
@@ -406,33 +305,33 @@ export const updUser_API = async (email, udpUser) => {
   }
 };
 
-export const updCredit_API = async (email, creditChange) => {
-  try {
-    let querySS = await store
-      .collection("users")
-      .where("email", "==", email)
-      .get();
 
-    if (querySS.empty) {
-      return {
-        status: false,
-        message: "No user found for this email/username: " + email
+export const like_API = async (uid, who, supperLike) => {
+  try {
+    let ref = store.collection("users").doc(uid).collection('likes').doc(who.uid);
+
+    const ss = await ref.get();
+
+    if (!ss.exists) {
+      const item = {
+        name: who.name,
+        age: who.age,
+        email: who.email,
+        uid: who.uid,
+        supperLike,
       };
+      ref.set(item);
     }
 
-    const ref = querySS.docs[0].ref;
-    const data = querySS.docs[0].data();
+    const likes = ref.parent.get().docs.map(docSS => {
+    
+      return docSS.data()
+    });
 
-    const newUser = {
-      ...data,
-      credit: data.credit + creditChange
-    };
-
-    await ref.update(newUser);
 
     return {
       status: true,
-      data: newUser
+      data: likes,
     };
   } catch (error) {
     console.log(error);
@@ -442,6 +341,7 @@ export const updCredit_API = async (email, creditChange) => {
     };
   }
 };
+
 
 export const fetchPrediction = async (queryString, gpsLoc) => {
   try {
