@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
+
 import {
   View,
   Text,
@@ -26,6 +26,11 @@ import {
 import ImageContainer from "./image-container";
 import MainImage from "./main-image";
 import commonColor from "../../theme/variables/commonColor";
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
+import { success, info, alert } from "../../services/Alert";
+import * as ActionType from "../../redux/actionType";
 
 class EditProfile extends Component {
   constructor() {
@@ -33,7 +38,9 @@ class EditProfile extends Component {
     this.state = {
       radioToggleMale: true,
       radioToggleFemale: false,
-      text: "",
+      aboutMe: "",
+      age: 0,
+      school: "",
       height: 0,
       ageSwitch: true,
       disSwitch: true
@@ -53,6 +60,38 @@ class EditProfile extends Component {
     });
   }
 
+  onSave = async () => {
+    const { radioToggleMale, radioToggleFemale, aboutMe, age, school  } = this.state
+    const { updateUser, user } = this.props
+
+    const updObj = {
+      gender: radioToggleMale ? 'male' : 'female',
+      aboutMe,
+      age,
+      college: school,
+    }
+
+    res = await updateUser(user.uid, updObj)
+
+    //success('Settings has been saved')
+
+    if(res.type == ActionType.UPDATE_USER_OK)
+      success('Profile has been saved')
+    else
+      alert('There is an unexpected error, please try again!')
+  };
+
+  componentDidMount() {
+    const { user } = this.props;
+    this.setState({
+      radioToggleMale: user.gender == "male",
+      radioToggleFemale: user.gender == "female",
+      aboutMe: user.aboutMe,
+      age: user.age,
+      school: user.college
+    });
+  }
+
   render() {
     const navigation = this.props.navigation;
     return (
@@ -67,8 +106,8 @@ class EditProfile extends Component {
             <Title>Edit Profile</Title>
           </Body>
           <Right>
-            <Button transparent onPress={() => navigation.navigate("AddPhoto")}>
-              <Icon name="md-add" style={{ color: "lightgrey" }} />
+            <Button transparent onPress={this.onSave}>
+              <Icon name="md-save" />
             </Button>
           </Right>
         </Header>
@@ -112,7 +151,7 @@ class EditProfile extends Component {
                 <TextInput
                   multiline={true}
                   placeholder="About you . . ."
-                  onChangeText={text => this.setState({ text })}
+                  onChangeText={aboutMe => this.setState({ aboutMe })}
                   maxLength={500}
                   numberOfLines={6}
                   style={[
@@ -123,47 +162,54 @@ class EditProfile extends Component {
                     }
                   ]}
                   underlineColorAndroid={"transparent"}
+                  value={this.state.aboutMe}
                 />
               </View>
             </View>
           </View>
-          {/* <View style={styles.headingView}>
-            <Text style={styles.headingText}>CurrentWork</Text>
+          <View style={styles.headingView}>
+            <Text style={styles.headingText}>Age</Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("CurrentWork")}>
-            <View style={styles.textView}>
-              <Text
-                style={{
-                  color: commonColor.contentTextColor,
-                  marginHorizontal: 7
-                }}
-              >
-                World Class Tennis Player
-              </Text>
+          <View style={styles.textView}>
+            <View style={{ marginLeft: 8 }}>
+              <TextInput
+                placeholder="your age . . ."
+                onChangeText={age => this.setState({ age })}
+                style={[
+                  styles.textArea,
+                  {
+                    height: Math.max(40, this.state.height),
+                    textAlignVertical: "top"
+                  }
+                ]}
+                underlineColorAndroid={"transparent"}
+                value={this.state.age}
+              />
             </View>
-          </TouchableOpacity> */}
+          </View>
+
           <View style={styles.headingView}>
             <Text style={styles.headingText}>School</Text>
           </View>
           <View style={styles.textView}>
-              <View style={{ marginLeft: 8 }}>
-                <TextInput
-                  multiline={true}
-                  placeholder="Your school ..."
-                  onChangeText={text => this.setState({ text })}
-                  maxLength={500}
-                  style={[
-                    styles.textArea,
-                    {
-                      height: Math.max(40, this.state.height),
-                      textAlignVertical: "top"
-                    }
-                  ]}
-                  underlineColorAndroid={"transparent"}
-                  value={'JCE, Bangalore'}
-                />
-              </View>
+            <View style={{ marginLeft: 8 }}>
+              <TextInput
+                multiline={true}
+                placeholder="Your school ..."
+                onChangeText={school => this.setState({ school })}
+                maxLength={500}
+                style={[
+                  styles.textArea,
+                  {
+                    height: Math.max(40, this.state.height),
+                    textAlignVertical: "top"
+                  }
+                ]}
+                underlineColorAndroid={"transparent"}
+                value={this.state.school}
+              />
             </View>
+          </View>
           {/* <TouchableOpacity onPress={() => navigation.navigate("School")}>
             <View style={styles.textView}>
               <Text
@@ -261,7 +307,7 @@ class EditProfile extends Component {
               </Right>
             </CardItem>
           </Card>*/}
-        </Content> 
+        </Content>
       </Container>
     );
   }
@@ -306,4 +352,11 @@ const styles = {
   }
 };
 
-export default connect()(EditProfile);
+export default connect(
+  state => ({
+    user: state.global.user
+  }),
+  {
+    updateUser: Actions.updateUser
+  }
+)(EditProfile);

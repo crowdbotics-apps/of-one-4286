@@ -5,6 +5,7 @@ const INITIAL_STATE = {
   message: "",
   likes: [],
   unlikes: [],
+  matchings: []
   
 };
 
@@ -63,6 +64,12 @@ const reducer = (state = INITIAL_STATE, action) => {
         return {
           ...state,
           message: action.payload.message
+        };
+        case ActionType.UPDATE_MATCH_OK:
+        //console.log('redux user updated', action.payload.user)
+        return {
+          ...state,
+          matchings: action.payload.matchings
         };
     default:
       return state;

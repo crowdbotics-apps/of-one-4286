@@ -59,7 +59,8 @@ export const signInWithFacebook1 = async () => {
           num: 0,
           email,
           fb_uid: providerData[0].uid,
-          uid
+          uid,
+          gender: ''
         };
 
         ref.set(item);
@@ -97,7 +98,7 @@ export const getUsers_API = async () => {
     const users = querySS.docs.map(docSS => {
       const user = docSS.data()
       if(user.uid != auth.currentUser.uid){
-        
+
         return user;
       }
       return null
@@ -278,7 +279,7 @@ export const getMatchingUsersNearby_API = async ({
 };
 
 
-export const updUser_API = async (email, udpUser) => {
+export const updUser_API = async (uid, udpUser) => {
   try {
     let ref = store.collection("users").doc(uid);
 

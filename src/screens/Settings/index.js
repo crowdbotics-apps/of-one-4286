@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Image, View, Text, Slider, Platform } from "react-native";
-import { NavigationActions ,StackActions} from "react-navigation";
+import { NavigationActions, StackActions } from "react-navigation";
 import {
   Container,
   Content,
@@ -17,6 +17,11 @@ import {
 } from "native-base";
 import styles from "./styles";
 import commonColor from "../../theme/variables/commonColor";
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
+import { success, info, alert }from "../../services/Alert";
+import * as ActionType from "../../redux/actionType";
 
 const resetAction = StackActions.reset({
   index: 0,
@@ -25,18 +30,23 @@ const resetAction = StackActions.reset({
 
 class Settings extends Component {
   state = {
-    trueSwitchIsOn: true,
-    trueSwitchIsOn2: true,
-    trueSwitchIsOn3: true,
-    falseSwitchIsOn: false,
-    notSwitch1: true,
-    notSwitch2: true,
-    notSwitch3: true,
-    notSwitch4: true,
+    // trueSwitchIsOn: true,
+    // trueSwitchIsOn2: true,
+    // trueSwitchIsOn3: true,
+    // falseSwitchIsOn: false,
+    // notSwitch1: true,
+    // notSwitch2: true,
+    // notSwitch3: true,
+    // notSwitch4: true,
+
+    // leftValue: 25,
+    // rightValue: 35,
+    // disKM: true,
+
     sliderValue: 0,
-    leftValue: 25,
-    rightValue: 35,
-    disKM: true
+    showMeMen: true,
+    showMeWomen: true,
+    showMeOnApp: true
   };
 
   changeDisType(val) {
@@ -47,8 +57,43 @@ class Settings extends Component {
     }
   }
 
+  onSave = async () => {
+    const { sliderValue, showMeMen, showMeWomen, showMeOnApp } = this.state
+    const { updateUser, user } = this.props
+
+    const updObj = {
+      distance: sliderValue,
+      showMeMen,
+      showMeWomen,
+      showMeOnApp,
+    }
+
+    res = await updateUser(user.uid, updObj)
+
+    //success('Settings has been saved')
+
+    if(res.type == ActionType.UPDATE_USER_OK)
+      success('Settings has been saved')
+    else
+      alert('There is an unexpected error, please try again!')
+
+
+  }
+
+  componentDidMount(){
+    const { user } = this.props
+    this.setState({
+      sliderValue: user.distance,
+      showMeMen: user.showMeMen,
+      showMeWomen: user.showMeWomen,
+      showMeOnApp: user.howMeOnApp,
+    })
+  }
+
   render() {
     const navigation = this.props.navigation;
+    
+
     return (
       <Container>
         <Header>
@@ -60,7 +105,11 @@ class Settings extends Component {
           <Body>
             <Title>Settings</Title>
           </Body>
-          <Right />
+          <Right>
+            <Button transparent onPress={this.onSave}>
+              <Icon name="md-save" />
+            </Button>
+          </Right>
         </Header>
         <Content style={styles.container}>
           <View style={{ paddingTop: 15, paddingHorizontal: 10 }}>
@@ -88,13 +137,12 @@ class Settings extends Component {
                 </Left>
                 <Right>
                   <Switch
-                    onValueChange={value =>
-                      this.setState({ trueSwitchIsOn: value })}
+                    onValueChange={value => this.setState({ showMeMen: value })}
                     onTintColor={commonColor.brandPrimary}
                     thumbTintColor={
                       Platform.OS === "android" ? "#ededed" : undefined
                     }
-                    value={this.state.trueSwitchIsOn}
+                    value={this.state.showMeMen}
                   />
                 </Right>
               </CardItem>
@@ -105,12 +153,13 @@ class Settings extends Component {
                 <Right>
                   <Switch
                     onValueChange={value =>
-                      this.setState({ falseSwitchIsOn: value })}
+                      this.setState({ showMeWomen: value })
+                    }
                     onTintColor={commonColor.brandPrimary}
                     thumbTintColor={
                       Platform.OS === "android" ? "#ededed" : undefined
                     }
-                    value={this.state.falseSwitchIsOn}
+                    value={this.state.showMeWomen}
                   />
                 </Right>
               </CardItem>
@@ -122,7 +171,7 @@ class Settings extends Component {
                 </Left>
                 <Right>
                   <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                    {this.state.sliderValue}km.
+                    {this.state.sliderValue} km.
                   </Text>
                 </Right>
               </CardItem>
@@ -131,8 +180,10 @@ class Settings extends Component {
                   style={{ margin: 10 }}
                   onValueChange={value => this.setState({ sliderValue: value })}
                   maximumValue={50}
+                  minimumValue={1}
                   minimumTrackTintColor={commonColor.brandPrimary}
                   step={1}
+                  value={this.state.sliderValue}
                 />
               </View>
             </Card>
@@ -142,13 +193,12 @@ class Settings extends Component {
               </Left>
               <Right>
                 <Switch
-                  onValueChange={value =>
-                    this.setState({ trueSwitchIsOn2: value })}
+                  onValueChange={value => this.setState({ showMeOnApp: value })}
                   onTintColor={commonColor.brandPrimary}
                   thumbTintColor={
                     Platform.OS === "android" ? "#ededed" : undefined
                   }
-                  value={this.state.trueSwitchIsOn2}
+                  value={this.state.showMeOnApp}
                 />
               </Right>
             </CardItem>
@@ -373,4 +423,11 @@ class Settings extends Component {
   }
 }
 
-export default Settings;
+export default connect(
+  state => ({
+    user: state.global.user
+  }),
+  {
+    updateUser: Actions.updateUser
+  }
+)(Settings);

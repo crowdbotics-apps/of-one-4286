@@ -21,7 +21,6 @@ import * as API from "../../services/Api";
 import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 import { Constants, Location, Permissions } from "expo";
-import { IfObservable } from "rxjs/observable/IfObservable";
 
 class PhotoCard extends Component {
   constructor(props) {
@@ -86,7 +85,8 @@ class PhotoCard extends Component {
     const { user, like } = this.props;
     const { selectedItem2 } = this._deckSwiper._root.state;
 
-    like(user.uid, selectedItem2, false);
+    await like(user.uid, selectedItem2, false);
+    checkMatch(user.uid, selectedItem2);
     this._deckSwiper._root.swipeRight();
   };
 
@@ -261,7 +261,7 @@ class PhotoCard extends Component {
               </Card>
             )}
             renderEmpty={() => (
-              <Text style={{ textAlign: "center" }}>No user nearby!</Text>
+              <Text style={{ textAlign: "center" }}>No user found nearby!</Text>
             )}
           />
         </View>
@@ -328,6 +328,7 @@ export default connect(
   }),
   {
     like: Actions.like,
-    unlike: Actions.unlike
+    unlike: Actions.unlike,
+    checkMatch: Actions.checkMatch,
   }
 )(PhotoCard);

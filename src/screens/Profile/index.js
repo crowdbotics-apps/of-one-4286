@@ -3,10 +3,13 @@ import { Image, View, TouchableOpacity } from "react-native";
 import { Container, Content, Icon, Button, Text } from "native-base";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
 class Profile extends Component {
   render() {
     const navigation = this.props.navigation;
+    const { user } = this.props;
     return (
       <Container style={styles.container}>
         <Content scrollEnabled={false}>
@@ -15,7 +18,11 @@ class Profile extends Component {
               onPress={() => navigation.navigate("UserDetails")}
             >
               <Image
-                source={require("../../../assets/federer.jpg")}
+                source={
+                  user.image == ""
+                    ? require("../../../assets/avatar.png")
+                    : { uri: item.image }
+                }
                 style={styles.profileImage}
               />
             </TouchableOpacity>
@@ -27,13 +34,15 @@ class Profile extends Component {
             </TouchableOpacity>
           </View>
           <View style={styles.profileDescriptionView}>
-            <Text style={styles.nameAndAgeText}>Roger Federer, 32</Text>
+            <Text style={styles.nameAndAgeText}>
+              {user.name}, {user.age}
+            </Text>
             {/* <View style={{ padding: 5 }}>
               <Text style={styles.workplaceText}>
                 World Class Tennis Player
               </Text>
             </View> */}
-            <Text style={styles.workplaceText}>JCE, Bangalore</Text>
+            <Text style={styles.workplaceText}>{user.college}</Text>
 
             <Button
               transparent
@@ -74,4 +83,9 @@ class Profile extends Component {
   }
 }
 
-export default Profile;
+export default connect(
+  state => ({
+    user: state.global.user
+  }),
+  {}
+)(Profile);

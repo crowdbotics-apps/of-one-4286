@@ -46,8 +46,8 @@ export const getUser = async uid => {
   }
 };
 
-export const updateUser = async (email, udpUser) => {
-  const res = await API.updUser_API(email, udpUser);
+export const updateUser = async (uid, udpUser) => {
+  const res = await API.updUser_API(uid, udpUser);
 
   if (res.status)
     return {
@@ -58,7 +58,7 @@ export const updateUser = async (email, udpUser) => {
     };
   else {
     return {
-      type: ActionType.GET_USER_NOK,
+      type: ActionType.UPDATE_USER_NOK,
       payload: {
         message: res.message
       }
@@ -104,6 +104,28 @@ export const unlike = async (uid, who) => {
   else {
     return {
       type: ActionType.UPDATE_UNLIKE_NOK,
+      payload: {
+        message: res.message
+      }
+    };
+  }
+};
+
+//uid - firebase uid - key
+//who is user - object
+export const checkMatch = async (uid, who) => {
+  const res = await API.checkMatch_API(uid, who);
+
+  if (res.status)
+    return {
+      type: ActionType.UPDATE_MATCH_OK,
+      payload: {
+        matchings: res.data
+      }
+    };
+  else {
+    return {
+      type: ActionType.UPDATE_MATCH_NOK,
       payload: {
         message: res.message
       }
