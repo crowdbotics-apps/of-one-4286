@@ -5,8 +5,8 @@ const INITIAL_STATE = {
   message: "",
   likes: [],
   unlikes: [],
-  matchings: []
-  
+  matchings: [],
+  person: null
 };
 
 const reducer = (state = INITIAL_STATE, action) => {
@@ -54,23 +54,29 @@ const reducer = (state = INITIAL_STATE, action) => {
         ...state,
         message: action.payload.message
       };
-      case ActionType.UPDATE_UNLIKE_OK:
-        //console.log('redux user updated', action.payload.user)
-        return {
-          ...state,
-          unlikes: action.payload.user
-        };
-      case ActionType.UPDATE_UNLIKE_NOK:
-        return {
-          ...state,
-          message: action.payload.message
-        };
-        case ActionType.UPDATE_MATCH_OK:
-        //console.log('redux user updated', action.payload.user)
-        return {
-          ...state,
-          matchings: action.payload.matchings
-        };
+    case ActionType.UPDATE_UNLIKE_OK:
+      //console.log('redux user updated', action.payload.user)
+      return {
+        ...state,
+        unlikes: action.payload.user
+      };
+    case ActionType.UPDATE_UNLIKE_NOK:
+      return {
+        ...state,
+        message: action.payload.message
+      };
+    case ActionType.UPDATE_MATCH_OK:
+      //console.log('redux user updated', action.payload.user)
+      return {
+        ...state,
+        matchings: action.payload.matchings
+      };
+    case ActionType.GET_PERSON_OK:
+
+      return {
+        ...state,
+        person: action.payload.person
+      };
     default:
       return state;
   }

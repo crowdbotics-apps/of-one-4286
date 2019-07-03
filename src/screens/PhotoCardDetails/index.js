@@ -1,15 +1,38 @@
 import React, { Component } from "react";
 import { View, Image, Platform } from "react-native";
-import { Container, Content, Text, Grid, Row, Icon, Button } from "native-base";
+import {
+  Container,
+  Content,
+  Text,
+  Grid,
+  Row,
+  Icon,
+  Button,
+  Spinner
+} from "native-base";
 import Swiper from "react-native-swiper";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
 var Dimensions = require("Dimensions");
 var { width, height } = Dimensions.get("window");
 
 class PhotoCardDetails extends Component {
+  componentDidMount() {
+    const person = this.props.navigation.getParam("person", null);
+
+    const { getPerson } = this.props;
+    getPerson(person.uid);
+  }
+
   render() {
+    const { person } = this.props;
+
+    if (!person) return <Spinner />;
+
     return (
       <Container style={{ backgroundColor: "#FFF" }}>
         <Content style={{ marginTop: Platform.OS === "ios" ? 20 : undefined }}>
@@ -38,7 +61,11 @@ class PhotoCardDetails extends Component {
               <View style={styles.slideView}>
                 <Image
                   style={styles.image}
-                  source={require("../../../assets/r4.jpg")}
+                  source={
+                    person.image == ""
+                      ? require("../../../assets/launchscreen.png")
+                      : { uri: item.image }
+                  }
                 />
               </View>
               <View style={styles.slideView}>
@@ -62,16 +89,21 @@ class PhotoCardDetails extends Component {
             </Button>
           </View>
           <View style={styles.subTextView}>
-            <Text style={styles.nameText}>Rachel McAdams, 26</Text>
+            <Text style={styles.nameText}>
+              {person.name}, {person.age}
+            </Text>
             {/* <Text style={styles.workingText}>Model, Actress</Text> */}
             {/* <Text style={styles.distanceAwayText}>3 km away</Text> */}
           </View>
-          <View style={styles.quoteView}>
-            <Text style={styles.quoteText}>
-              Good things happen when we meet strangers!! Also, about section
-              here, this is specific user details page
-            </Text>
-          </View>
+
+          {person.aboutMe != null ? (
+            <View style={styles.quoteView}>
+              <Text style={styles.quoteText}>{person.aboutMe}</Text>
+            </View>
+          ) : (
+            <React.Fragment />
+          )}
+
           <View style={styles.instagramPhotoCountView}>
             <Text>Photos</Text>
           </View>
@@ -262,4 +294,13 @@ class PhotoCardDetails extends Component {
   }
 }
 
-export default PhotoCardDetails;
+export default connect(
+  state => ({
+    person: state.global.person
+  }),
+  {
+    getPerson: Actions.getPerson
+    // unlike: Actions.unlike,
+    // checkMatch: Actions.checkMatch,
+  }
+)(PhotoCardDetails);

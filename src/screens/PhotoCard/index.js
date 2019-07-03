@@ -82,27 +82,28 @@ class PhotoCard extends Component {
   };
 
   onLike = async person => {
-    const { user, like } = this.props;
-    const { selectedItem2 } = this._deckSwiper._root.state;
+    const { user, like, checkMatch } = this.props;
+    const { selectedItem } = this._deckSwiper._root.state;
 
-    await like(user.uid, selectedItem2, false);
-    checkMatch(user.uid, selectedItem2);
+    await like(user.uid, selectedItem, false);
+    checkMatch(user.uid, selectedItem);
     this._deckSwiper._root.swipeRight();
   };
 
   onUnLike = async person => {
     const { user, unlike } = this.props;
-    const { selectedItem2 } = this._deckSwiper._root.state;
+    const { selectedItem } = this._deckSwiper._root.state;
 
-    unlike(user.uid, selectedItem2);
+    unlike(user.uid, selectedItem);
     this._deckSwiper._root.swipeLeft();
   };
 
   onSuperLike = async () => {
-    const { user, like } = this.props;
-    const { selectedItem2 } = this._deckSwiper._root.state;
+    const { user, like, checkMatch } = this.props;
+    const { selectedItem } = this._deckSwiper._root.state;
 
-    like(user.uid, selectedItem2, true);
+    await like(user.uid, selectedItem, true);
+    checkMatch(user.uid, selectedItem);
     this._deckSwiper._root.swipeRight();
 
     // const navigation = this.props.navigation;
@@ -124,18 +125,19 @@ class PhotoCard extends Component {
     // }
   };
 
-  onSwipeRight = () => {
-    const { user, like } = this.props;
-    const { selectedItem2 } = this._deckSwiper._root.state;
+  onSwipeRight = async () => {
+    const { user, like, checkMatch } = this.props;
+    const { selectedItem } = this._deckSwiper._root.state;
 
-    like(user.uid, selectedItem2, false);
+    await like(user.uid, selectedItem, false);
+    checkMatch(user.uid, selectedItem);
   };
 
-  onSwipeLeft = () => {
+  onSwipeLeft = async () => {
     const { user, unlike } = this.props;
-    const { selectedItem2 } = this._deckSwiper._root.state;
+    const { selectedItem } = this._deckSwiper._root.state;
 
-    unlike(user.uid, selectedItem2);
+    unlike(user.uid, selectedItem);
   };
 
   render() {
@@ -165,7 +167,7 @@ class PhotoCard extends Component {
                   style={styles.deckswiperImageCarditem}
                   activeOpacity={1}
                   cardBody
-                  onPress={() => navigation.navigate("PhotoCardDetails")}
+                  onPress={() => navigation.navigate("PhotoCardDetails", {person: item})}
                 >
                   <ImageBackground
                     style={styles.cardMain}
@@ -244,7 +246,7 @@ class PhotoCard extends Component {
                 <CardItem
                   button
                   activeOpacity={1}
-                  onPress={() => navigation.navigate("PhotoCardDetails")}
+                  onPress={() => navigation.navigate("PhotoCardDetails", {person: item})}
                   style={styles.deckswiperDetailsCarditem}
                 >
                   <Body>

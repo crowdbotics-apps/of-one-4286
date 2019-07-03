@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
-import { Text } from "react-native";
+
+import { Text, FlatList } from "react-native";
 import {
   Container,
   Content,
@@ -13,11 +13,14 @@ import {
   Left,
   Right,
   Body,
-  List
+  
 } from "native-base";
 import { NavigationActions } from "react-navigation";
 import styles from "./styles";
-import data from "./data";
+// import data from "./data";
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
 const navigateAction = name =>
   NavigationActions.navigate({
@@ -28,6 +31,19 @@ const navigateAction = name =>
 class ChatList extends Component {
   render() {
     const navigation = this.props.navigation;
+    const { matchings } = this.props;
+
+    const data = matchings.map(item => {
+      return {
+        name: item.name,
+        distance: "",
+        thumbnail:
+          !item.image 
+            ? require("../../../assets/avatar.png")
+            : { uri: item.image }
+      };
+    });
+
     return (
       <Container style={{ backgroundColor: "#FFF" }}>
         <Header>
@@ -42,30 +58,30 @@ class ChatList extends Component {
           <Right />
         </Header>
         <Content>
-          <List
+          <FlatList
             removeClippedSubviews={false}
             style={{ marginTop: 7 }}
-            dataArray={data}
-            renderRow={dataRow =>
+            data={data}
+            renderItem={({item}) => (
               <ListItem
                 avatar
                 button
                 style={{ marginLeft: 15 }}
                 onPress={() =>
-                  navigation.dispatch(navigateAction(dataRow.name))}
+                  navigation.dispatch(navigateAction(item.name))
+                }
               >
                 <Left>
-                  <Thumbnail round source={dataRow.thumbnail} />
+                  <Thumbnail round source={item.thumbnail} />
                 </Left>
                 <Body>
-                  <Text style={styles.userNameText}>
-                    {dataRow.name}
-                  </Text>
+                  <Text style={styles.userNameText}>{item.name}</Text>
                   {/* <Text style={styles.distanceText}>
                     {dataRow.distance}
                   </Text> */}
                 </Body>
-              </ListItem>}
+              </ListItem>
+            )}
           />
         </Content>
       </Container>
@@ -73,4 +89,12 @@ class ChatList extends Component {
   }
 }
 
-export default connect()(ChatList);
+export default connect(
+  state => ({
+    matchings: state.global.matchings,
+    user: state.global.user
+  }),
+  {
+    getMatchings: Actions.getMatchings
+  }
+)(ChatList);

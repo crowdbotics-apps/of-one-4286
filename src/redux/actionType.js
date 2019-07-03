@@ -15,3 +15,6 @@ export const UPDATE_USER_NOK = 'UPDATE_USER_NOK'
 
 export const UPDATE_MATCH_OK = 'UPDATE_MATCH_OK'
 export const UPDATE_MATCH_NOK = 'UPDATE_MATCH_NOK'
+
+export const GET_PERSON_OK = 'GET_PERSON_OK'
+export const GET_PERSON_NOK = 'GET_PERSON_NOK'

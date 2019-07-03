@@ -117,6 +117,39 @@ export const getUsers_API = async () => {
   }
 };
 
+export const getMatchings_API = async (uid) => {
+  try {
+   
+    const querySS = await store.collection("users").doc(uid).collection('matchings').get()
+
+    if (querySS.empty) {
+      return {
+        status: false,
+        message: "No data found"
+      };
+    }
+
+    const matchings = querySS.docs.map(docSS => {
+    
+      return docSS.data()
+    });
+   
+
+ 
+
+    return {
+      status: true,
+      data: matchings
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
 export const getUser_API = async (uid) => {
   try {
     
@@ -124,6 +157,8 @@ export const getUser_API = async (uid) => {
     let ref = store.collection("users").doc(uid);
 
     const docSS = await ref.get();
+
+
 
     if (docSS == null) {
       return {
@@ -388,9 +423,10 @@ export const checkMatch_API = async (uid, who) => {
   try {
     let refPerson = store.collection("users").doc(who.uid).collection('likes').doc(uid);
 
-    const ss = await ref.get();
+    const ss = await refPerson.get();
 
-    if (!ss.exists) {
+    if (!ss.exists || true) {
+      // console.log('checkMatch_API', who)
       const match = {
         name: who.name,
         age: who.age,
