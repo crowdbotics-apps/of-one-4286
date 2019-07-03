@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
+
 import { View, Image, TouchableOpacity, Platform } from "react-native";
 import { Container, Content, Text, Icon, Button } from "native-base";
 import Swiper from "react-native-swiper";
@@ -7,9 +7,13 @@ import styles from "./styles";
 
 var Dimensions = require("Dimensions");
 var { width, height } = Dimensions.get("window");
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
 class UserDetails extends Component {
   render() {
+    const {user} = this.props
     const navigation = this.props.navigation;
     return (
       <Container style={{ backgroundColor: "#FFF" }}>
@@ -33,10 +37,14 @@ class UserDetails extends Component {
               <View style={styles.slide}>
                 <Image
                   style={styles.image}
-                  source={require("../../../assets/rf1.jpg")}
+                  source={
+                    user.image == ""
+                      ? require("../../../assets/launchscreen.png")
+                      : { uri: user.image }
+                  }
                 />
               </View>
-              <View style={styles.slide}>
+              {/* <View style={styles.slide}>
                 <Image
                   style={styles.image}
                   source={require("../../../assets/federerOne.jpg")}
@@ -47,7 +55,7 @@ class UserDetails extends Component {
                   style={styles.image}
                   source={require("../../../assets/rf2.jpg")}
                 />
-              </View>
+              </View> */}
             </Swiper>
             {Platform.OS === "android" &&
               <Button
@@ -82,8 +90,8 @@ class UserDetails extends Component {
             </TouchableOpacity>
           </View>
           <View style={styles.subText}>
-            <Text style={styles.name}>Roger Federer, 34</Text>
-            <Text style={styles.workingText}>World Class Tennis Player</Text>
+            <Text style={styles.name}>{user.name}, {user.age}</Text>
+            <Text style={styles.workingText}>{user.college}</Text>
             <Button
               style={styles.createBtn}
               onPress={() => navigation.navigate("EditProfile")}
@@ -93,15 +101,14 @@ class UserDetails extends Component {
           </View>
           <View style={styles.quote}>
             <Text>
-              Good things happen when we meet strangers!! Also, about section
-              here This is specific user details page
+              {user.aboutMe}
             </Text>
           </View>
           <View style={styles.instagramPhotoCount}>
-            <Text>12 Instagram Photos</Text>
+            <Text>Photos</Text>
           </View>
           <View style={styles.thumbnailView}>
-            <Swiper
+            {/* <Swiper
               style={styles.wrapper2}
               width={width}
               height={
@@ -167,11 +174,12 @@ class UserDetails extends Component {
                 />
               </View>
             </Swiper>
+           */}
           </View>
-          <View style={styles.interestTextHeading}>
+          {/* <View style={styles.interestTextHeading}>
             <Text>3 interests</Text>
-          </View>
-          <View style={styles.interestsView}>
+          </View> */}
+          {/* <View style={styles.interestsView}>
             <View style={styles.interestTextView}>
               <Text style={styles.interestText}> Deepika Padukone</Text>
             </View>
@@ -181,11 +189,21 @@ class UserDetails extends Component {
             <View style={styles.interestTextView}>
               <Text style={styles.interestText}> Game of Thrones</Text>
             </View>
-          </View>
+          </View> */}
         </Content>
       </Container>
     );
   }
 }
 
-export default connect()(UserDetails);
+
+export default connect(
+  state => ({
+    user: state.global.user
+  }),
+  {
+    // getPerson: Actions.getPerson
+    // unlike: Actions.unlike,
+    // checkMatch: Actions.checkMatch,
+  }
+)(UserDetails);

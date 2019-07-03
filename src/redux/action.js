@@ -120,7 +120,7 @@ export const unlike = async (uid, who) => {
     return {
       type: ActionType.UPDATE_UNLIKE_OK,
       payload: {
-        likes: res.data
+        unlikes: res.data
       }
     };
   else {
@@ -156,7 +156,6 @@ export const checkMatch = async (uid, who) => {
 };
 
 //uid - firebase uid - key
-//who is user - object
 export const getMatchings = async (uid) => {
   const res = await API.getMatchings_API(uid);
   // console.log('checkMatch', res)
@@ -170,6 +169,50 @@ export const getMatchings = async (uid) => {
   else {
     return {
       type: ActionType.UPDATE_MATCH_NOK,
+      payload: {
+        message: res.message
+      }
+    };
+  }
+};
+
+//uid - firebase uid - key
+//image name - unique
+//uri - downloadable URI
+export const updateUserImages = async (uid, image, uri) => {
+  const res = await API.updUserImages_API(uid, image, uri);
+  // console.log('checkMatch', res)
+  if (res.status)
+    return {
+      type: ActionType.UPDATE_IMAGES_OK,
+      payload: {
+        images: res.data
+      }
+    };
+  else {
+    return {
+      type: ActionType.UPDATE_IMAGES_NOK,
+      payload: {
+        message: res.message
+      }
+    };
+  }
+};
+
+//uid - firebase uid - key
+export const getImages = async (uid) => {
+  const res = await API.getImages_API(uid);
+  // console.log('checkMatch', res)
+  if (res.status)
+    return {
+      type: ActionType.UPDATE_IMAGES_OK,
+      payload: {
+        images: res.data
+      }
+    };
+  else {
+    return {
+      type: ActionType.UPDATE_IMAGES_NOK,
       payload: {
         message: res.message
       }

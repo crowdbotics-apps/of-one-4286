@@ -19,13 +19,13 @@ class LoadingScreen extends Component {
 
     // Listen for authentication state to change.
 
-    this.unsubscriber = auth.onAuthStateChanged((user) => {
+    this.unsubscriber = auth.onAuthStateChanged(async (user) => {
       try {
 
         //const userToken = await AsyncStorage.getItem('userToken');
         //console.log('loading user: ', user )
         if (user ) {
-          this.props.getUser(user.uid)
+          await this.props.getUser(user.uid)
           this.props.navigation.navigate('HomeTabNavigation');
         } else {
           this.props.navigation.navigate('Login');

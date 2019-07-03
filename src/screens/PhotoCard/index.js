@@ -49,10 +49,20 @@ class PhotoCard extends Component {
   async componentDidMount() {
     await this._getLocationAsync();
 
+    const { unlikes, user } = this.props;
     const resUsers = await API.getUsers_API();
     let users = [];
     if (resUsers.status) {
       users = resUsers.data;
+
+      users = users.filter(
+        item => unlikes.filter(unlike => unlike.uid == item.uid).length == 0
+      );
+
+      if (!user.showMeWomen)
+        users = users.filter(item => item.gender != "female");
+        
+      if (!user.showMeMen) users = users.filter(item => item.gender != "male");
 
       this.setState({ users });
     }
@@ -60,11 +70,23 @@ class PhotoCard extends Component {
 
   onRefresh = async () => {
     const resUsers = await API.getUsers_API();
-
+    const { unlikes, user } = this.props;
 
     let users = [];
     if (resUsers.status) {
       users = resUsers.data;
+
+      users = users.filter(
+        item => this.props.unlikes.filter(unlike => unlike.uid == item.uid).length == 0
+      );
+
+      if (!user.showMeWomen)
+        users = users.filter(item => item.gender != "female");
+
+      if (!user.showMeMen) users = users.filter(item => item.gender != "male");
+
+
+      console.log('users', users, this.props.unlikes)
       if (Array.isArray(users) && users.length > 1) {
         this._deckSwiper._root.setState({
           lastCard: false,
@@ -77,7 +99,6 @@ class PhotoCard extends Component {
 
         this.setState({ users });
       }
-
     }
   };
 
@@ -147,7 +168,7 @@ class PhotoCard extends Component {
     const navigation = this.props.navigation;
     if (users.length == 0) return <Spinner />;
 
-  // if (users.length < 2) return <Text>No user found.</Text>;
+    // if (users.length < 2) return <Text>No user found.</Text>;
 
     return (
       <Container style={styles.wrapper}>
@@ -167,7 +188,9 @@ class PhotoCard extends Component {
                   style={styles.deckswiperImageCarditem}
                   activeOpacity={1}
                   cardBody
-                  onPress={() => navigation.navigate("PhotoCardDetails", {person: item})}
+                  onPress={() =>
+                    navigation.navigate("PhotoCardDetails", { person: item })
+                  }
                 >
                   <ImageBackground
                     style={styles.cardMain}
@@ -246,7 +269,9 @@ class PhotoCard extends Component {
                 <CardItem
                   button
                   activeOpacity={1}
-                  onPress={() => navigation.navigate("PhotoCardDetails", {person: item})}
+                  onPress={() =>
+                    navigation.navigate("PhotoCardDetails", { person: item })
+                  }
                   style={styles.deckswiperDetailsCarditem}
                 >
                   <Body>
@@ -326,11 +351,12 @@ class PhotoCard extends Component {
 
 export default connect(
   state => ({
-    user: state.global.user
+    user: state.global.user,
+    unlikes: state.global.unlikes
   }),
   {
     like: Actions.like,
     unlike: Actions.unlike,
-    checkMatch: Actions.checkMatch,
+    checkMatch: Actions.checkMatch
   }
 )(PhotoCard);

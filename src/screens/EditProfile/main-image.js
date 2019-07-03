@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Platform, Image } from "react-native";
+import { View, Platform, Image, TouchableOpacity } from "react-native";
 import { Icon } from "native-base";
 import commonColor from "../../theme/variables/commonColor";
 
@@ -14,13 +14,13 @@ class MainImage extends Component {
               source={this.props.source ? this.props.source : null}
             />
           </View>
-          <View style={styles.addButtonLayout}>
+          <TouchableOpacity style={styles.addButtonLayout} onPress={() => this.props.source ? this.props.onDel() : this.props.onAdd()}>
             <View style={styles.addButton}>
               {this.props.source
                 ? <Icon name="md-close" style={styles.icon} />
                 : <Icon name="md-add" style={styles.icon} />}
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
     );

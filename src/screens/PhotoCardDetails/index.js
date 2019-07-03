@@ -64,11 +64,11 @@ class PhotoCardDetails extends Component {
                   source={
                     person.image == ""
                       ? require("../../../assets/launchscreen.png")
-                      : { uri: item.image }
+                      : { uri: person.image }
                   }
                 />
               </View>
-              <View style={styles.slideView}>
+              {/* <View style={styles.slideView}>
                 <Image
                   style={styles.image}
                   source={require("../../../assets/r5.jpg")}
@@ -79,7 +79,7 @@ class PhotoCardDetails extends Component {
                   style={styles.image}
                   source={require("../../../assets/r1.jpeg")}
                 />
-              </View>
+              </View> */}
             </Swiper>
             <Button
               onPress={() => this.props.navigation.goBack()}
@@ -108,7 +108,7 @@ class PhotoCardDetails extends Component {
             <Text>Photos</Text>
           </View>
           <View>
-            <Swiper
+            {/* <Swiper
               width={width}
               height={
                 Platform.OS === "ios"
@@ -240,7 +240,9 @@ class PhotoCardDetails extends Component {
                   source={require("../../../assets/r6.jpg")}
                 />
               </View>
+            
             </Swiper>
+           */}
           </View>
           {/*here*/}
           {/* <View style={styles.interestTextHeadingView}>

@@ -6,7 +6,8 @@ const INITIAL_STATE = {
   likes: [],
   unlikes: [],
   matchings: [],
-  person: null
+  person: null,
+  images: []
 };
 
 const reducer = (state = INITIAL_STATE, action) => {
@@ -47,7 +48,7 @@ const reducer = (state = INITIAL_STATE, action) => {
       //console.log('redux user updated', action.payload.user)
       return {
         ...state,
-        likes: action.payload.user
+        likes: action.payload.likes
       };
     case ActionType.UPDATE_LIKE_NOK:
       return {
@@ -58,7 +59,7 @@ const reducer = (state = INITIAL_STATE, action) => {
       //console.log('redux user updated', action.payload.user)
       return {
         ...state,
-        unlikes: action.payload.user
+        unlikes: action.payload.unlikes
       };
     case ActionType.UPDATE_UNLIKE_NOK:
       return {
@@ -71,8 +72,13 @@ const reducer = (state = INITIAL_STATE, action) => {
         ...state,
         matchings: action.payload.matchings
       };
+    case ActionType.UPDATE_IMAGES_OK:
+      //console.log('redux user updated', action.payload.user)
+      return {
+        ...state,
+        images: action.payload.images
+      };
     case ActionType.GET_PERSON_OK:
-
       return {
         ...state,
         person: action.payload.person

@@ -6,7 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   Platform,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  ActivityIndicator
 } from "react-native";
 import {
   Container,
@@ -31,6 +32,7 @@ import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 import { success, info, alert } from "../../services/Alert";
 import * as ActionType from "../../redux/actionType";
+import { Constants, Permissions, ImagePicker } from "expo";
 
 class EditProfile extends Component {
   constructor() {
@@ -43,7 +45,12 @@ class EditProfile extends Component {
       school: "",
       height: 0,
       ageSwitch: true,
-      disSwitch: true
+      disSwitch: true,
+
+      imageMain: "",
+      images: [],
+
+      loading: false
     };
   }
 
@@ -61,38 +68,97 @@ class EditProfile extends Component {
   }
 
   onSave = async () => {
-    const { radioToggleMale, radioToggleFemale, aboutMe, age, school  } = this.state
-    const { updateUser, user } = this.props
-
-    const updObj = {
-      gender: radioToggleMale ? 'male' : 'female',
+    const {
+      radioToggleMale,
+      radioToggleFemale,
       aboutMe,
       age,
-      college: school,
-    }
+      school
+    } = this.state;
+    const { updateUser, user } = this.props;
 
-    res = await updateUser(user.uid, updObj)
+    const updObj = {
+      gender: radioToggleMale ? "male" : "female",
+      aboutMe,
+      age,
+      college: school
+    };
+
+    res = await updateUser(user.uid, updObj);
 
     //success('Settings has been saved')
 
-    if(res.type == ActionType.UPDATE_USER_OK)
-      success('Profile has been saved')
-    else
-      alert('There is an unexpected error, please try again!')
+    if (res.type == ActionType.UPDATE_USER_OK)
+      success("Profile has been saved");
+    else alert("There is an unexpected error, please try again!");
   };
 
-  componentDidMount() {
+  onChooseImagePress = async name => {
+    //let result = await ImagePicker.launchCameraAsync();
+    let result = await ImagePicker.launchImageLibraryAsync();
+
     const { user } = this.props;
+
+    if (!result.cancelled) {
+      this.setState({ loading: true });
+      console.log(result);
+      const uri = await API.uploadImage(user.uid, result.uri, name);
+      console.log(uri);
+
+
+      await this.props.updateUser(user.uid, { image: uri });
+      
+      this.refresh();
+      this.setState({ loading: false });
+    }
+  };
+
+  onDeleteImage = async name => {
+    const { user } = this.props;
+
+    const res = await API.deleteImage(user.uid, name);
+
+    await this.props.updateUser(user.uid, { image: "" });
+    this.refresh();
+    console.log(res);
+  };
+
+  getPermissionAsync = async () => {
+    if (Constants.platform.ios) {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      if (status !== "granted") {
+        alert("Sorry, we need camera roll permissions to make this work!");
+      }
+    }
+  };
+
+  refresh = () => {
+    const { user, images } = this.props;
     this.setState({
       radioToggleMale: user.gender == "male",
       radioToggleFemale: user.gender == "female",
       aboutMe: user.aboutMe,
       age: user.age,
-      school: user.college
+      school: user.college,
+      images: images,
+      imageMain: user.image
     });
+  };
+
+  async componentDidMount() {
+    this.getPermissionAsync();
+    await this.props.getImages(this.props.user.uid);
+
+    this.refresh();
   }
 
   render() {
+    if (this.state.loading)
+      return (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color="#0000ff" style={{ backgroundColor: "transparent" }} />
+        </View>
+      );
     const navigation = this.props.navigation;
     return (
       <Container style={styles.container}>
@@ -114,19 +180,74 @@ class EditProfile extends Component {
         <Content style={{ marginTop: 2 }}>
           <View style={styles.imagesSectionView}>
             <View style={styles.rowOneView}>
-              <MainImage source={require("../../../assets/rf1.jpg")} />
+              <MainImage
+                source={
+                  this.state.imageMain != ""
+                    ? { uri: this.state.imageMain }
+                    : null
+                }
+                onAdd={this.onChooseImagePress.bind(this, "main.png")}
+                onDel={this.onDeleteImage.bind(this, "main.png")}
+              />
               <View style={{ flex: 1 }}>
                 <ImageContainer
                   marginLeft={10}
-                  source={require("../../../assets/federerOne.jpg")}
+                  source={
+                    this.state.images[0] != null
+                      ? { uri: this.state.images[0] }
+                      : null
+                  }
+                  onAdd={this.onChooseImagePress.bind(this, `images_0.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_0.png")}
                 />
                 <ImageContainer
                   marginLeft={10}
-                  source={require("../../../assets/rf2.jpg")}
+                  source={
+                    this.state.images[1] != null
+                      ? { uri: this.state.images[1] }
+                      : null
+                  }
+                  onAdd={this.onChooseImagePress.bind(this, `images_1.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_1.png")}
                 />
               </View>
             </View>
+
             <View>
+              <View style={{ flexDirection: "row" }}>
+                <ImageContainer
+                  source={
+                    this.state.images[2] != null
+                      ? { uri: this.state.images[2] }
+                      : null
+                  }
+                  onAdd={this.onChooseImagePress.bind(this, `images_2.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_2.png")}
+                />
+                <ImageContainer
+                  marginLeft={20}
+                  source={
+                    this.state.images[3] != null
+                      ? { uri: this.state.images[3] }
+                      : null
+                  }
+                  onAdd={this.onChooseImagePress.bind(this, `images_3.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_3.png")}
+                />
+                <ImageContainer
+                  marginLeft={20}
+                  source={
+                    this.state.images[4] != null
+                      ? { uri: this.state.images[4] }
+                      : null
+                  }
+                  onAdd={this.onChooseImagePress.bind(this, `images_4.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_4.png")}
+                />
+              </View>
+            </View>
+
+            {/* <View>
               <View style={{ flexDirection: "row" }}>
                 <ImageContainer
                   source={require("../../../assets/federer.jpg")}
@@ -134,7 +255,7 @@ class EditProfile extends Component {
                 <ImageContainer marginLeft={20} />
                 <ImageContainer marginLeft={20} />
               </View>
-            </View>
+            </View> */}
           </View>
 
           <View
@@ -354,9 +475,12 @@ const styles = {
 
 export default connect(
   state => ({
-    user: state.global.user
+    user: state.global.user,
+    images: state.global.images
   }),
   {
-    updateUser: Actions.updateUser
+    updateUser: Actions.updateUser,
+    updateUserImages: Actions.updateUserImages,
+    getImages: Actions.getImages
   }
 )(EditProfile);

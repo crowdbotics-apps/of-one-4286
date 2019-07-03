@@ -21,7 +21,7 @@ class Profile extends Component {
                 source={
                   user.image == ""
                     ? require("../../../assets/avatar.png")
-                    : { uri: item.image }
+                    : { uri: user.image }
                 }
                 style={styles.profileImage}
               />
