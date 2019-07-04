@@ -22,6 +22,7 @@ import {GiftedChat, Actions, Bubble, Send} from "react-native-gifted-chat";
 import CustomActions from "./CustomActions";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
+import Fire from './Fire';
 
 var {height} = Dimensions.get("window");
 
@@ -48,11 +49,18 @@ class chatScreen extends Component {
     this.userName = this.props.navigation.state.params.name;
   }
 
+  get user() {
+    return {
+      name: this.props.navigation.state.params.name,
+      _id: Fire.shared.uid,
+    };
+  }
+
   componentWillMount() {
     this._isMounted = true;
     this.setState(() => {
       return {
-        messages: require("./data.js")
+        messages: []
       };
     });
   }
@@ -62,32 +70,43 @@ class chatScreen extends Component {
   }
 
   componentDidMount() {
-    setTimeout(() => {
-      this.setState({show: true});
-    }, 600);
+    // setTimeout(() => {
+    //   this.setState({show: true});
+    // }, 600);
+
+    Fire.shared.on(messages =>
+      this.setState(previousState => ({
+        messages: GiftedChat.append(previousState.messages, messages),
+      }))
+    );
+    this.setState({show: true});
+  }
+
+  componentWillUnmount() {
+    Fire.shared.off();
   }
 
   onLoadEarlier() {
     this.setState(previousState => {
       return {
-        isLoadingEarlier: true
+        isLoadingEarlier: false
       };
     });
 
-    setTimeout(() => {
-      if (this._isMounted === true) {
-        this.setState(previousState => {
-          return {
-            messages: GiftedChat.prepend(
-              previousState.messages,
-              require("./old.js")
-            ),
-            loadEarlier: false,
-            isLoadingEarlier: false
-          };
-        });
-      }
-    }, 1000); // simulating network
+    // setTimeout(() => {
+    //   if (this._isMounted === true) {
+    //     this.setState(previousState => {
+    //       return {
+    //         messages: GiftedChat.prepend(
+    //           previousState.messages,
+    //           require("./old.js")
+    //         ),
+    //         loadEarlier: false,
+    //         isLoadingEarlier: false
+    //       };
+    //     });
+    //   }
+    // }, 1000); // simulating network
   }
 
   onSend(messages = []) {
@@ -98,7 +117,7 @@ class chatScreen extends Component {
     });
 
     // for demo purpose
-    this.answerDemo(messages);
+    //this.answerDemo(messages);
   }
 
   answerDemo(messages) {
@@ -253,13 +272,15 @@ class chatScreen extends Component {
           <View style={{flex: 1}}>
             <GiftedChat
               messages={this.state.messages}
-              onSend={this.onSend}
-              loadEarlier={this.state.loadEarlier}
-              onLoadEarlier={this.onLoadEarlier}
-              isLoadingEarlier={this.state.isLoadingEarlier}
-              user={{
-                _id: 1 // sent messages should have same user._id
-              }}
+              //onSend={this.onSend}
+              onSend={Fire.shared.send}
+              //loadEarlier={this.state.loadEarlier}
+             // onLoadEarlier={this.onLoadEarlier}
+              //isLoadingEarlier={this.state.isLoadingEarlier}
+              //user={{
+              //  _id: 1 // sent messages should have same user._id
+              //}}
+              user={this.user}
               renderActions={this.renderCustomActions}
               renderBubble={this.renderBubble}
               renderFooter={this.renderFooter}

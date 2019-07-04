@@ -499,13 +499,14 @@ export const checkMatch_API = async (uid, who) => {
 
     const ss = await refPerson.get();
 
-    if (!ss.exists) {
+    if (!ss.exists || true) {
       // console.log('checkMatch_API', who)
       const match = {
         name: who.name,
         age: who.age,
         email: who.email,
-        uid: who.uid
+        uid: who.uid,
+        image: who.image,
       };
       let ref = store
         .collection("users")
@@ -524,7 +525,8 @@ export const checkMatch_API = async (uid, who) => {
         name: me.name,
         age: me.age,
         email: me.email,
-        uid: me.uid
+        uid: me.uid,
+        image: me.image,
       };
       let refPerson = store
         .collection("users")

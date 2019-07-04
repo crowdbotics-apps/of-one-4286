@@ -12,8 +12,7 @@ import {
   Thumbnail,
   Left,
   Right,
-  Body,
-  
+  Body
 } from "native-base";
 import { NavigationActions } from "react-navigation";
 import styles from "./styles";
@@ -29,6 +28,13 @@ const navigateAction = name =>
   });
 
 class ChatList extends Component {
+  async componentDidMount() {
+    await this.props.getMatchings(this.props.user.uid);
+
+    if (!(this.props.matchings.length > 0))
+      this.props.navigation.navigate("Chat");
+  }
+
   render() {
     const navigation = this.props.navigation;
     const { matchings } = this.props;
@@ -37,10 +43,9 @@ class ChatList extends Component {
       return {
         name: item.name,
         distance: "",
-        thumbnail:
-          !item.image 
-            ? require("../../../assets/avatar.png")
-            : { uri: item.image }
+        thumbnail: !item.image
+          ? require("../../../assets/avatar.png")
+          : { uri: item.image } 
       };
     });
 
@@ -62,14 +67,12 @@ class ChatList extends Component {
             removeClippedSubviews={false}
             style={{ marginTop: 7 }}
             data={data}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <ListItem
                 avatar
                 button
                 style={{ marginLeft: 15 }}
-                onPress={() =>
-                  navigation.dispatch(navigateAction(item.name))
-                }
+                onPress={() => navigation.dispatch(navigateAction(item.name))}
               >
                 <Left>
                   <Thumbnail round source={item.thumbnail} />

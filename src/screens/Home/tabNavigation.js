@@ -4,13 +4,14 @@ import { Icon, Header, FooterTab, Button, Thumbnail } from "native-base";
 import Profile from "../Profile";
 import PhotoCard from "../PhotoCard";
 import Chat from "../Chat";
+import ChatList from "../ChatList";
 import styles from "./styles";
 
 const HomeTabNavigation = createBottomTabNavigator(
   {
     Profile: { screen: Profile },
     PhotoCard: { screen: PhotoCard },
-    Chat: { screen: Chat }
+    Chat: { screen: ChatList }
   },
   {
     tabBarPosition: "top",
