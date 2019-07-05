@@ -376,19 +376,19 @@ class Settings extends Component {
             <View style={{ marginVertical: 10 }}>
               <Text style={styles.text}>Contact Us</Text>
             </View>
-            <Button block style={styles.helpBtn}>
+            <Button
+              block
+              style={styles.helpBtn}
+              onPress={() => {
+                Linking.openURL("mailto://support@ofone.org");
+              }}
+            >
               <Text style={styles.helpBtnText}>Help & Support</Text>
             </Button>
 
             <View style={{ marginVertical: 10 }}>
               <Card style={{ borderRadius: 5 }}>
-                <CardItem style={{ borderRadius: 5 }}>
-                  <Text style={styles.redText}>Legal</Text>
-                </CardItem>
-                <View style={{ paddingLeft: 3, marginBottom: 10 }}>
-                  <Button transparent small>
-                    <Text style={styles.cardItemText}>Licenses</Text>
-                  </Button>
+                <View style={{ paddingLeft: 3, marginVertical: 10 }}>
                   <Button
                     transparent
                     small
@@ -400,7 +400,15 @@ class Settings extends Component {
                   >
                     <Text style={styles.cardItemText}>Privacy Policy</Text>
                   </Button>
-                  <Button transparent small>
+                  <Button
+                    transparent
+                    small
+                    onPress={() => {
+                      Linking.openURL(
+                        "https://app.termly.io/document/terms-of-use-for-website/f6f7062f-2bf7-4cf2-ab99-0e7c72e5dfe4"
+                      );
+                    }}
+                  >
                     <Text style={styles.cardItemText}>Terms of Service</Text>
                   </Button>
                 </View>
