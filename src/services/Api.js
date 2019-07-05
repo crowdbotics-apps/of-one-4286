@@ -91,7 +91,7 @@ export const getUsers_API = async () => {
 
     const users = querySS.docs.map(docSS => {
       const user = docSS.data();
-      if (user.uid != auth.currentUser.uid) {
+      if (user.uid != auth.currentUser.uid && user.showMeOnApp) {
         return user;
       }
       return null;
