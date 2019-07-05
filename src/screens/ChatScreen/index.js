@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import {connect} from "react-redux";
 import {
   View,
   Text,
@@ -23,6 +22,9 @@ import CustomActions from "./CustomActions";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
 import Fire from './Fire';
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+// import * as Actions from "../../redux/action";
 
 var {height} = Dimensions.get("window");
 
@@ -49,10 +51,19 @@ class chatScreen extends Component {
     this.userName = this.props.navigation.state.params.name;
   }
 
-  get user() {
+  get person() {
+    const { person } = this.props.navigation.state.params
     return {
-      name: this.props.navigation.state.params.name,
-      _id: Fire.shared.uid,
+      name: person.name,
+      _id: person.uid,
+    };
+  }
+
+  get user() {
+    const { user } = this.props
+    return {
+      name: user.name,
+      _id: user.uid,
     };
   }
 
@@ -65,14 +76,15 @@ class chatScreen extends Component {
     });
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
 
-  componentDidMount() {
+  async componentDidMount() {
     // setTimeout(() => {
     //   this.setState({show: true});
     // }, 600);
+    const { person } = this.props.navigation.state.params
+    const { user } = this.props
+
+    await Fire.shared.init(user.uid, person.uid )
 
     Fire.shared.on(messages =>
       this.setState(previousState => ({
@@ -83,6 +95,7 @@ class chatScreen extends Component {
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     Fire.shared.off();
   }
 
@@ -294,4 +307,10 @@ class chatScreen extends Component {
   }
 }
 
-export default connect()(chatScreen);
+export default connect(
+  state => ({
+    user: state.global.user,
+  }),
+  {
+  }
+)(chatScreen);

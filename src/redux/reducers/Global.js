@@ -73,7 +73,7 @@ const reducer = (state = INITIAL_STATE, action) => {
         matchings: action.payload.matchings
       };
     case ActionType.UPDATE_IMAGES_OK:
-      //console.log('redux user updated', action.payload.user)
+      // console.log('redux user UPDATE_IMAGES_OK', action.payload.images)
       return {
         ...state,
         images: action.payload.images

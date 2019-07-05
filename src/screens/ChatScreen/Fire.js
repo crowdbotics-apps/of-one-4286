@@ -8,7 +8,23 @@ class Fire {
   }
 
   get ref() {
-    return store.collection("messages");
+    return store.collection("chats").doc(this.chatID).collection("messages");
+  }
+
+  init = async (sender, receiver) => {
+    this.chatID = (sender <= receiver) ? sender + "_" + receiver : receiver + "_" + sender 
+
+    const ref = store.collection("chats").doc(this.chatID)
+    const ss = await ref.get()
+
+    if(!ss.exists){
+      const chat = {
+        id: this.chatID,
+      }
+
+      ref.set(chat)
+
+    }
   }
 
   parse = snapshot => {
@@ -37,6 +53,7 @@ class Fire {
         text,
         user,
         createdAt: moment(timestamp, 'X').toDate(),
+        
       };
 
       messages.push(message);
@@ -60,7 +77,7 @@ class Fire {
         text,
         user,
         timestamp: this.timestamp,
-       
+        
       };
       this.append(message);
     }

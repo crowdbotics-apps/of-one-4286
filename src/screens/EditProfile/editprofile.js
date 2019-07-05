@@ -103,11 +103,15 @@ class EditProfile extends Component {
       this.setState({ loading: true });
       console.log(result);
       const uri = await API.uploadImage(user.uid, result.uri, name);
+      //const uri = "image path";
       console.log(uri);
 
+      if (name == "main.png")
+        await this.props.updateUser(user.uid, { image: uri });
+      else {
+        await this.props.updateUserImages(user.uid, name, uri);
+      }
 
-      await this.props.updateUser(user.uid, { image: uri });
-      
       this.refresh();
       this.setState({ loading: false });
     }
@@ -118,7 +122,11 @@ class EditProfile extends Component {
 
     const res = await API.deleteImage(user.uid, name);
 
-    await this.props.updateUser(user.uid, { image: "" });
+    if (name == "main.png")
+      await this.props.updateUser(user.uid, { image: "" });
+    else {
+      await this.props.updateUserImages(user.uid, name, "");
+    }
     this.refresh();
     console.log(res);
   };
@@ -153,10 +161,50 @@ class EditProfile extends Component {
   }
 
   render() {
+    console.log("images", this.state.images);
+    let image0 = "",
+      image1 = "",
+      image2 = "",
+      image3 = "",
+      image4 = "",
+      image5 = "",
+      image6 = "";
+    this.state.images &&
+      this.state.images.forEach(item => {
+        switch (item.id) {
+          case "images_0.png":
+            image0 = item.uri;
+            break;
+          case "images_1.png":
+            image1 = item.uri;
+            break;
+          case "images_2.png":
+            image2 = item.uri;
+            break;
+          case "images_3.png":
+            image3 = item.uri;
+            break;
+          case "images_4.png":
+            image4 = item.uri;
+            break;
+          case "images_5.png":
+            image5 = item.uri;
+            break;
+          case "images_6.png":
+            image6 = item.uri;
+            break;
+        }
+      });
     if (this.state.loading)
       return (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color="#0000ff" style={{ backgroundColor: "transparent" }} />
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator
+            size="large"
+            color="#F7524C"
+            style={{ backgroundColor: "transparent" }}
+          />
         </View>
       );
     const navigation = this.props.navigation;
@@ -192,21 +240,13 @@ class EditProfile extends Component {
               <View style={{ flex: 1 }}>
                 <ImageContainer
                   marginLeft={10}
-                  source={
-                    this.state.images[0] != null
-                      ? { uri: this.state.images[0] }
-                      : null
-                  }
-                  onAdd={this.onChooseImagePress.bind(this, `images_0.png`)}
+                  source={image0 != "" ? { uri: image0 } : null}
+                  onAdd={this.onChooseImagePress.bind(this, "images_0.png")}
                   onDel={this.onDeleteImage.bind(this, "images_0.png")}
                 />
                 <ImageContainer
                   marginLeft={10}
-                  source={
-                    this.state.images[1] != null
-                      ? { uri: this.state.images[1] }
-                      : null
-                  }
+                  source={image1 != "" ? { uri: image1 } : null}
                   onAdd={this.onChooseImagePress.bind(this, `images_1.png`)}
                   onDel={this.onDeleteImage.bind(this, "images_1.png")}
                 />
@@ -216,31 +256,19 @@ class EditProfile extends Component {
             <View>
               <View style={{ flexDirection: "row" }}>
                 <ImageContainer
-                  source={
-                    this.state.images[2] != null
-                      ? { uri: this.state.images[2] }
-                      : null
-                  }
+                source={image2 != "" ? { uri: image2 } : null}
                   onAdd={this.onChooseImagePress.bind(this, `images_2.png`)}
                   onDel={this.onDeleteImage.bind(this, "images_2.png")}
                 />
                 <ImageContainer
                   marginLeft={20}
-                  source={
-                    this.state.images[3] != null
-                      ? { uri: this.state.images[3] }
-                      : null
-                  }
+                  source={image3 != "" ? { uri: image3 } : null}
                   onAdd={this.onChooseImagePress.bind(this, `images_3.png`)}
                   onDel={this.onDeleteImage.bind(this, "images_3.png")}
                 />
                 <ImageContainer
                   marginLeft={20}
-                  source={
-                    this.state.images[4] != null
-                      ? { uri: this.state.images[4] }
-                      : null
-                  }
+                  source={image4 != "" ? { uri: image4 } : null}
                   onAdd={this.onChooseImagePress.bind(this, `images_4.png`)}
                   onDel={this.onDeleteImage.bind(this, "images_4.png")}
                 />

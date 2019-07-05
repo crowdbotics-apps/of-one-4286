@@ -21,10 +21,10 @@ import * as API from "../../services/Api";
 import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 
-const navigateAction = name =>
+const navigateAction = person =>
   NavigationActions.navigate({
     routeName: "ChatScreen",
-    params: { name: name }
+    params: { person: person }
   });
 
 class ChatList extends Component {
@@ -45,7 +45,8 @@ class ChatList extends Component {
         distance: "",
         thumbnail: !item.image
           ? require("../../../assets/avatar.png")
-          : { uri: item.image } 
+          : { uri: item.image } ,
+        uid: item.uid,
       };
     });
 
@@ -72,7 +73,7 @@ class ChatList extends Component {
                 avatar
                 button
                 style={{ marginLeft: 15 }}
-                onPress={() => navigation.dispatch(navigateAction(item.name))}
+                onPress={() => navigation.dispatch(navigateAction(item))}
               >
                 <Left>
                   <Thumbnail round source={item.thumbnail} />

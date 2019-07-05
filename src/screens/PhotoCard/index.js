@@ -43,6 +43,13 @@ class PhotoCard extends Component {
     }
 
     let location = await Location.getCurrentPositionAsync({});
+    // console.log('location',   //longitude)
+
+    this.props.updateUser(this.props.user.uid, {
+      lat: location.coords.latitude,
+      long: location.coords.longitude
+    });
+
     //console.log(location);
   };
 
@@ -61,7 +68,7 @@ class PhotoCard extends Component {
 
       if (!user.showMeWomen)
         users = users.filter(item => item.gender != "female");
-        
+
       if (!user.showMeMen) users = users.filter(item => item.gender != "male");
 
       this.setState({ users });
@@ -77,7 +84,9 @@ class PhotoCard extends Component {
       users = resUsers.data;
 
       users = users.filter(
-        item => this.props.unlikes.filter(unlike => unlike.uid == item.uid).length == 0
+        item =>
+          this.props.unlikes.filter(unlike => unlike.uid == item.uid).length ==
+          0
       );
 
       if (!user.showMeWomen)
@@ -85,8 +94,7 @@ class PhotoCard extends Component {
 
       if (!user.showMeMen) users = users.filter(item => item.gender != "male");
 
-
-      console.log('users', users, this.props.unlikes)
+      console.log("users", users, this.props.unlikes);
       if (Array.isArray(users) && users.length > 1) {
         this._deckSwiper._root.setState({
           lastCard: false,
@@ -357,6 +365,7 @@ export default connect(
   {
     like: Actions.like,
     unlike: Actions.unlike,
-    checkMatch: Actions.checkMatch
+    checkMatch: Actions.checkMatch,
+    updateUser: Actions.updateUser
   }
 )(PhotoCard);

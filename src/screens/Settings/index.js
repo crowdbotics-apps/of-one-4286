@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Image, View, Text, Slider, Platform } from "react-native";
+import { Image, View, Text, Slider, Platform, Linking } from "react-native";
 import { NavigationActions, StackActions } from "react-navigation";
 import {
   Container,
@@ -20,7 +20,7 @@ import commonColor from "../../theme/variables/commonColor";
 import * as API from "../../services/Api";
 import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
-import { success, info, alert }from "../../services/Alert";
+import { success, info, alert } from "../../services/Alert";
 import * as ActionType from "../../redux/actionType";
 
 const resetAction = StackActions.reset({
@@ -58,41 +58,37 @@ class Settings extends Component {
   }
 
   onSave = async () => {
-    const { sliderValue, showMeMen, showMeWomen, showMeOnApp } = this.state
-    const { updateUser, user } = this.props
+    const { sliderValue, showMeMen, showMeWomen, showMeOnApp } = this.state;
+    const { updateUser, user } = this.props;
 
     const updObj = {
       distance: sliderValue,
       showMeMen,
       showMeWomen,
-      showMeOnApp,
-    }
+      showMeOnApp
+    };
 
-    res = await updateUser(user.uid, updObj)
+    res = await updateUser(user.uid, updObj);
 
     //success('Settings has been saved')
 
-    if(res.type == ActionType.UPDATE_USER_OK)
-      success('Settings has been saved')
-    else
-      alert('There is an unexpected error, please try again!')
+    if (res.type == ActionType.UPDATE_USER_OK)
+      success("Settings has been saved");
+    else alert("There is an unexpected error, please try again!");
+  };
 
-
-  }
-
-  componentDidMount(){
-    const { user } = this.props
+  componentDidMount() {
+    const { user } = this.props;
     this.setState({
       sliderValue: user.distance,
       showMeMen: user.showMeMen,
       showMeWomen: user.showMeWomen,
-      showMeOnApp: user.howMeOnApp,
-    })
+      showMeOnApp: user.showMeOnApp
+    });
   }
 
   render() {
     const navigation = this.props.navigation;
-    
 
     return (
       <Container>
@@ -113,7 +109,7 @@ class Settings extends Component {
         </Header>
         <Content style={styles.container}>
           <View style={{ paddingTop: 15, paddingHorizontal: 10 }}>
-            <View style={{ marginBottom: 10 }}>
+            {/* <View style={{ marginBottom: 10 }}>
               <Text style={styles.text}>Discovery Settings</Text>
             </View>
             <Card>
@@ -126,7 +122,7 @@ class Settings extends Component {
               <Text style={styles.someText}>
                 Change your swipe location to see Tinder members in other cities
               </Text>
-            </View>
+            </View> */}
             <Card style={styles.card}>
               <CardItem style={styles.cardItemHeaderView}>
                 <Text style={styles.redText}>Show Me</Text>
@@ -171,7 +167,7 @@ class Settings extends Component {
                 </Left>
                 <Right>
                   <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                    {this.state.sliderValue} km.
+                    {this.state.sliderValue} mi.
                   </Text>
                 </Right>
               </CardItem>
@@ -189,7 +185,7 @@ class Settings extends Component {
             </Card>
             <CardItem style={styles.switchBlock}>
               <Left>
-                <Text style={styles.swipText}>Show me on DatingApp</Text>
+                <Text style={styles.swipText}>Show me on OfOne App</Text>
               </Left>
               <Right>
                 <Switch
@@ -204,7 +200,7 @@ class Settings extends Component {
             </CardItem>
             <View>
               <Text style={styles.someText}>
-                DatingApp uses these preferences to suggest matches.Some match
+                OfOne app uses these preferences to suggest matches.Some match
                 suggestions may not fall within your desired parameters.
               </Text>
             </View>
@@ -393,7 +389,15 @@ class Settings extends Component {
                   <Button transparent small>
                     <Text style={styles.cardItemText}>Licenses</Text>
                   </Button>
-                  <Button transparent small>
+                  <Button
+                    transparent
+                    small
+                    onPress={() => {
+                      Linking.openURL(
+                        "https://app.termly.io/document/privacy-policy/67185285-f602-4e03-8812-192c45653a06"
+                      );
+                    }}
+                  >
                     <Text style={styles.cardItemText}>Privacy Policy</Text>
                   </Button>
                   <Button transparent small>

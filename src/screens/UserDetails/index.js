@@ -12,19 +12,30 @@ import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 
 class UserDetails extends Component {
+  async componentDidMount() {
+    const { user, images, getImages } = this.props;
+    if (!Array.isArray(images) || images.length == 0) {
+
+      await getImages(user.uid);
+    }
+  }
   render() {
-    const {user} = this.props
+    const { user, images } = this.props;
+    const imageList = images.filter(item => item.uri != '')
+
+
     const navigation = this.props.navigation;
     return (
       <Container style={{ backgroundColor: "#FFF" }}>
         <Content style={{ marginTop: Platform.OS === "ios" ? 20 : 0 }}>
-          {Platform.OS === "android" &&
+          {Platform.OS === "android" && (
             <Button
               style={styles.createBtn}
               onPress={() => navigation.navigate("EditProfile")}
             >
               <Icon name="md-create" style={{ width: 20, left: -5 }} />
-            </Button>}
+            </Button>
+          )}
           <View style={styles.instagramPhotosCarousel}>
             <Swiper
               style={styles.wrapper}
@@ -57,13 +68,14 @@ class UserDetails extends Component {
                 />
               </View> */}
             </Swiper>
-            {Platform.OS === "android" &&
+            {Platform.OS === "android" && (
               <Button
                 style={styles.createBtn}
                 onPress={() => navigation.navigate("EditProfile")}
               >
                 <Icon name="md-create" />
-              </Button>}
+              </Button>
+            )}
             <TouchableOpacity
               onPress={() => navigation.goBack()}
               style={{
@@ -90,7 +102,9 @@ class UserDetails extends Component {
             </TouchableOpacity>
           </View>
           <View style={styles.subText}>
-            <Text style={styles.name}>{user.name}, {user.age}</Text>
+            <Text style={styles.name}>
+              {user.name}, {user.age}
+            </Text>
             <Text style={styles.workingText}>{user.college}</Text>
             <Button
               style={styles.createBtn}
@@ -100,15 +114,13 @@ class UserDetails extends Component {
             </Button>
           </View>
           <View style={styles.quote}>
-            <Text>
-              {user.aboutMe}
-            </Text>
+            <Text>{user.aboutMe}</Text>
           </View>
           <View style={styles.instagramPhotoCount}>
             <Text>Photos</Text>
           </View>
           <View style={styles.thumbnailView}>
-            {/* <Swiper
+            <Swiper
               style={styles.wrapper2}
               width={width}
               height={
@@ -122,32 +134,22 @@ class UserDetails extends Component {
               loop={false}
             >
               <View style={styles.sixThumbnailsInCarousel}>
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federer.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federerOne.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federer.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federerOne.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federer.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federerOne.jpg")}
-                />
+                {Array.isArray(imageList) ? (
+                  imageList.map(image => {
+                    
+                    return (
+                      <Image
+                        style={styles.thumbnail}
+                        source={{ uri: image.uri }}
+                        resizeMode='contain'
+                      />
+                    );
+                  })
+                ) : (
+                  <React.Fragment />
+                )}
               </View>
-              <View style={styles.sixThumbnailsInCarousel}>
+              {/* <View style={styles.sixThumbnailsInCarousel}>
                 <Image
                   style={styles.thumbnail}
                   source={require("../../../assets/federerOne.jpg")}
@@ -173,8 +175,8 @@ class UserDetails extends Component {
                   source={require("../../../assets/federer.jpg")}
                 />
               </View>
+             */}
             </Swiper>
-           */}
           </View>
           {/* <View style={styles.interestTextHeading}>
             <Text>3 interests</Text>
@@ -196,14 +198,15 @@ class UserDetails extends Component {
   }
 }
 
-
 export default connect(
   state => ({
-    user: state.global.user
+    user: state.global.user,
+    images: state.global.images
   }),
   {
     // getPerson: Actions.getPerson
     // unlike: Actions.unlike,
     // checkMatch: Actions.checkMatch,
+    getImages: Actions.getImages
   }
 )(UserDetails);

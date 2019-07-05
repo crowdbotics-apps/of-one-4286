@@ -340,11 +340,17 @@ export const updUserImages_API = async (uid, image, uri) => {
 
     if (!ss.exists) {
       // console.log('checkMatch_API', who)
-      const image = {
+      const item = {
         uri: uri,
         id: image
       };
-      ref.set(image);
+      ref.set(item);
+    }else{
+      const item = {
+        uri: uri,
+        id: image
+      };
+      ref.update(item);
     }
 
     const querySS = await store
@@ -385,7 +391,7 @@ export const getImages_API = async uid => {
       };
     }
 
-    const matchings = querySS.docs.map(docSS => {
+    const images = querySS.docs.map(docSS => {
       return docSS.data();
     });
 
@@ -499,7 +505,7 @@ export const checkMatch_API = async (uid, who) => {
 
     const ss = await refPerson.get();
 
-    if (!ss.exists || true) {
+    if (!ss.exists ) {
       // console.log('checkMatch_API', who)
       const match = {
         name: who.name,

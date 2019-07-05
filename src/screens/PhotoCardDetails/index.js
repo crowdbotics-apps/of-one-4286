@@ -21,11 +21,22 @@ var Dimensions = require("Dimensions");
 var { width, height } = Dimensions.get("window");
 
 class PhotoCardDetails extends Component {
-  componentDidMount() {
+  state = {
+    images: []
+  };
+  async componentDidMount() {
     const person = this.props.navigation.getParam("person", null);
 
     const { getPerson } = this.props;
-    getPerson(person.uid);
+    await getPerson(person.uid);
+
+    const res = await API.getImages_API(person.uid);
+    if (res.status) {
+      const images = res.data;
+      this.setState({
+        images: images.filter(image => image.uri != "")
+      });
+    }
   }
 
   render() {
@@ -108,7 +119,7 @@ class PhotoCardDetails extends Component {
             <Text>Photos</Text>
           </View>
           <View>
-            {/* <Swiper
+            <Swiper
               width={width}
               height={
                 Platform.OS === "ios"
@@ -137,32 +148,21 @@ class PhotoCardDetails extends Component {
               loop={false}
             >
               <View style={styles.instagramCarouselView}>
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r3.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r4.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r5.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r6.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r1.jpeg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r2.jpg")}
-                />
+                {Array.isArray(this.state.images) ? (
+                  this.state.images.map(image => {
+                    return (
+                      <Image
+                        style={styles.thumbnail}
+                        source={{ uri: image.uri }}
+                        resizeMode='contain'
+                      />
+                    );
+                  })
+                ) : (
+                  <React.Fragment />
+                )}
               </View>
-              <View style={styles.instagramCarouselView}>
+              {/* <View style={styles.instagramCarouselView}>
                 <Image
                   style={styles.thumbnail}
                   source={require("../../../assets/r2.jpg")}
@@ -239,10 +239,8 @@ class PhotoCardDetails extends Component {
                   style={styles.thumbnail}
                   source={require("../../../assets/r6.jpg")}
                 />
-              </View>
-            
+              </View> */}
             </Swiper>
-           */}
           </View>
           {/*here*/}
           {/* <View style={styles.interestTextHeadingView}>
