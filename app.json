@@ -1,8 +1,12 @@
 {
   "expo": {
+    "name": "of one app",
+    "version": "0.0.4",
+    "privacy": "unlisted",
+    "scheme": "exp",
     "sdkVersion": "33.0.0",
     "icon": "./assets/DefaultIcon.png",
-    "slug": "strapdatingapp",
+    "slug": "of-one-app",
     "splash": {
       "image": "./assets/launchscreen.png",
       "resizeMode": "cover"
@@ -14,16 +18,19 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.crowdbotics.ofone"
+      "bundleIdentifier": "com.crowdbotics.ofoneapp"
     },
     "android": {
-      "package": "com.crowdbotics.ofone"
+      "package": "com.crowdbotics.ofoneapp"
     },
     "androidStatusBarColor": "#EEE",
     "androidStatusBar": {
       "barStyle": "dark-content",
       "backgroundColor": "#EEE"
-    }
+    },
+    "facebookScheme": "fb2399590830276163",
+    "facebookDisplayName": "Of One",
+    "facebookAppId": "2399590830276163"
     
   }
 }

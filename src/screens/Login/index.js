@@ -4,7 +4,6 @@ import { Container, Content, Text, Button, View } from "native-base";
 import Swiper from "react-native-swiper";
 import styles from "./styles";
 import commonColor from "../../theme/variables/commonColor";
-import {signInWithFacebook} from '../../services/Authentication'
 import {alert} from '../../services/Alert'
 import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
