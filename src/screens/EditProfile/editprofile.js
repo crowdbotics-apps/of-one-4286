@@ -1,12 +1,13 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
+
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   Platform,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  ActivityIndicator
 } from "react-native";
 import {
   Container,
@@ -26,6 +27,12 @@ import {
 import ImageContainer from "./image-container";
 import MainImage from "./main-image";
 import commonColor from "../../theme/variables/commonColor";
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
+import { success, info, alert } from "../../services/Alert";
+import * as ActionType from "../../redux/actionType";
+import { Constants, Permissions, ImagePicker } from "expo";
 
 class EditProfile extends Component {
   constructor() {
@@ -33,10 +40,17 @@ class EditProfile extends Component {
     this.state = {
       radioToggleMale: true,
       radioToggleFemale: false,
-      text: "",
+      aboutMe: "",
+      age: 0,
+      school: "",
       height: 0,
       ageSwitch: true,
-      disSwitch: true
+      disSwitch: true,
+
+      imageMain: "",
+      images: [],
+
+      loading: false
     };
   }
 
@@ -53,41 +67,215 @@ class EditProfile extends Component {
     });
   }
 
+  onSave = async () => {
+    const {
+      radioToggleMale,
+      radioToggleFemale,
+      aboutMe,
+      age,
+      school
+    } = this.state;
+    const { updateUser, user } = this.props;
+
+    const updObj = {
+      gender: radioToggleMale ? "male" : "female",
+      aboutMe,
+      age,
+      college: school
+    };
+
+    res = await updateUser(user.uid, updObj);
+
+    //success('Settings has been saved')
+
+    if (res.type == ActionType.UPDATE_USER_OK)
+      success("Profile has been saved");
+    else alert("There is an unexpected error, please try again!");
+  };
+
+  onChooseImagePress = async name => {
+    //let result = await ImagePicker.launchCameraAsync();
+    let result = await ImagePicker.launchImageLibraryAsync();
+
+    const { user } = this.props;
+
+    if (!result.cancelled) {
+      this.setState({ loading: true });
+      console.log(result);
+      const uri = await API.uploadImage(user.uid, result.uri, name);
+      //const uri = "image path";
+      console.log(uri);
+
+      if (name == "main.png")
+        await this.props.updateUser(user.uid, { image: uri });
+      else {
+        await this.props.updateUserImages(user.uid, name, uri);
+      }
+
+      this.refresh();
+      this.setState({ loading: false });
+    }
+  };
+
+  onDeleteImage = async name => {
+    const { user } = this.props;
+
+    const res = await API.deleteImage(user.uid, name);
+
+    if (name == "main.png")
+      await this.props.updateUser(user.uid, { image: "" });
+    else {
+      await this.props.updateUserImages(user.uid, name, "");
+    }
+    this.refresh();
+    console.log(res);
+  };
+
+  getPermissionAsync = async () => {
+    if (Constants.platform.ios) {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      if (status !== "granted") {
+        alert("Sorry, we need camera roll permissions to make this work!");
+      }
+    }
+  };
+
+  refresh = () => {
+    const { user, images } = this.props;
+    this.setState({
+      radioToggleMale: user.gender == "male",
+      radioToggleFemale: user.gender == "female",
+      aboutMe: user.aboutMe,
+      age: user.age,
+      school: user.college,
+      images: images,
+      imageMain: user.image
+    });
+  };
+
+  async componentDidMount() {
+    this.getPermissionAsync();
+    await this.props.getImages(this.props.user.uid);
+
+    this.refresh();
+  }
+
   render() {
+    console.log("images", this.state.images);
+    let image0 = "",
+      image1 = "",
+      image2 = "",
+      image3 = "",
+      image4 = "",
+      image5 = "",
+      image6 = "";
+    this.state.images &&
+      this.state.images.forEach(item => {
+        switch (item.id) {
+          case "images_0.png":
+            image0 = item.uri;
+            break;
+          case "images_1.png":
+            image1 = item.uri;
+            break;
+          case "images_2.png":
+            image2 = item.uri;
+            break;
+          case "images_3.png":
+            image3 = item.uri;
+            break;
+          case "images_4.png":
+            image4 = item.uri;
+            break;
+          case "images_5.png":
+            image5 = item.uri;
+            break;
+          case "images_6.png":
+            image6 = item.uri;
+            break;
+        }
+      });
+    if (this.state.loading)
+      return (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator
+            size="large"
+            color="#F7524C"
+            style={{ backgroundColor: "transparent" }}
+          />
+        </View>
+      );
     const navigation = this.props.navigation;
     return (
       <Container style={styles.container}>
         <Header>
           <Left>
             <Button transparent onPress={() => navigation.goBack()}>
-              <Icon name="ios-arrow-back-outline" />
+              <Icon name="md-arrow-back" />
             </Button>
           </Left>
           <Body>
             <Title>Edit Profile</Title>
           </Body>
           <Right>
-            <Button transparent onPress={() => navigation.navigate("AddPhoto")}>
-              <Icon name="md-add" style={{ color: "lightgrey" }} />
+            <Button transparent onPress={this.onSave}>
+              <Icon name="md-save" />
             </Button>
           </Right>
         </Header>
         <Content style={{ marginTop: 2 }}>
           <View style={styles.imagesSectionView}>
             <View style={styles.rowOneView}>
-              <MainImage source={require("../../../assets/rf1.jpg")} />
+              <MainImage
+                source={
+                  this.state.imageMain != ""
+                    ? { uri: this.state.imageMain }
+                    : null
+                }
+                onAdd={this.onChooseImagePress.bind(this, "main.png")}
+                onDel={this.onDeleteImage.bind(this, "main.png")}
+              />
               <View style={{ flex: 1 }}>
                 <ImageContainer
                   marginLeft={10}
-                  source={require("../../../assets/federerOne.jpg")}
+                  source={image0 != "" ? { uri: image0 } : null}
+                  onAdd={this.onChooseImagePress.bind(this, "images_0.png")}
+                  onDel={this.onDeleteImage.bind(this, "images_0.png")}
                 />
                 <ImageContainer
                   marginLeft={10}
-                  source={require("../../../assets/rf2.jpg")}
+                  source={image1 != "" ? { uri: image1 } : null}
+                  onAdd={this.onChooseImagePress.bind(this, `images_1.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_1.png")}
                 />
               </View>
             </View>
+
             <View>
+              <View style={{ flexDirection: "row" }}>
+                <ImageContainer
+                source={image2 != "" ? { uri: image2 } : null}
+                  onAdd={this.onChooseImagePress.bind(this, `images_2.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_2.png")}
+                />
+                <ImageContainer
+                  marginLeft={20}
+                  source={image3 != "" ? { uri: image3 } : null}
+                  onAdd={this.onChooseImagePress.bind(this, `images_3.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_3.png")}
+                />
+                <ImageContainer
+                  marginLeft={20}
+                  source={image4 != "" ? { uri: image4 } : null}
+                  onAdd={this.onChooseImagePress.bind(this, `images_4.png`)}
+                  onDel={this.onDeleteImage.bind(this, "images_4.png")}
+                />
+              </View>
+            </View>
+
+            {/* <View>
               <View style={{ flexDirection: "row" }}>
                 <ImageContainer
                   source={require("../../../assets/federer.jpg")}
@@ -95,7 +283,7 @@ class EditProfile extends Component {
                 <ImageContainer marginLeft={20} />
                 <ImageContainer marginLeft={20} />
               </View>
-            </View>
+            </View> */}
           </View>
 
           <View
@@ -105,14 +293,14 @@ class EditProfile extends Component {
             }}
           >
             <View style={styles.headingView}>
-              <Text style={styles.headingText}>About Federer</Text>
+              <Text style={styles.headingText}>About You</Text>
             </View>
             <View style={styles.textView}>
               <View style={{ marginLeft: 8 }}>
                 <TextInput
                   multiline={true}
                   placeholder="About you . . ."
-                  onChangeText={text => this.setState({ text })}
+                  onChangeText={aboutMe => this.setState({ aboutMe })}
                   maxLength={500}
                   numberOfLines={6}
                   style={[
@@ -123,29 +311,55 @@ class EditProfile extends Component {
                     }
                   ]}
                   underlineColorAndroid={"transparent"}
+                  value={this.state.aboutMe}
                 />
               </View>
             </View>
           </View>
           <View style={styles.headingView}>
-            <Text style={styles.headingText}>CurrentWork</Text>
+            <Text style={styles.headingText}>Age</Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("CurrentWork")}>
-            <View style={styles.textView}>
-              <Text
-                style={{
-                  color: commonColor.contentTextColor,
-                  marginHorizontal: 7
-                }}
-              >
-                World Class Tennis Player
-              </Text>
+          <View style={styles.textView}>
+            <View style={{ marginLeft: 8 }}>
+              <TextInput
+                placeholder="your age . . ."
+                onChangeText={age => this.setState({ age })}
+                style={[
+                  styles.textArea,
+                  {
+                    height: Math.max(40, this.state.height),
+                    textAlignVertical: "top"
+                  }
+                ]}
+                underlineColorAndroid={"transparent"}
+                value={this.state.age}
+              />
             </View>
-          </TouchableOpacity>
+          </View>
+
           <View style={styles.headingView}>
             <Text style={styles.headingText}>School</Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("School")}>
+          <View style={styles.textView}>
+            <View style={{ marginLeft: 8 }}>
+              <TextInput
+                multiline={true}
+                placeholder="Your school ..."
+                onChangeText={school => this.setState({ school })}
+                maxLength={500}
+                style={[
+                  styles.textArea,
+                  {
+                    height: Math.max(40, this.state.height),
+                    textAlignVertical: "top"
+                  }
+                ]}
+                underlineColorAndroid={"transparent"}
+                value={this.state.school}
+              />
+            </View>
+          </View>
+          {/* <TouchableOpacity onPress={() => navigation.navigate("School")}>
             <View style={styles.textView}>
               <Text
                 style={{
@@ -156,7 +370,7 @@ class EditProfile extends Component {
                 JCE, Bangalore
               </Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <View style={{ marginVertical: 5 }}>
             <View style={styles.headingView}>
               <Text style={styles.headingText}>Gender</Text>
@@ -203,7 +417,7 @@ class EditProfile extends Component {
               </View>
             </TouchableWithoutFeedback>
           </View>
-          <View style={styles.headingView}>
+          {/* <View style={styles.headingView}>
             <Text style={styles.headingText}>Control Your Profile</Text>
           </View>
           <Card
@@ -241,7 +455,7 @@ class EditProfile extends Component {
                 />
               </Right>
             </CardItem>
-          </Card>
+          </Card>*/}
         </Content>
       </Container>
     );
@@ -287,4 +501,14 @@ const styles = {
   }
 };
 
-export default connect()(EditProfile);
+export default connect(
+  state => ({
+    user: state.global.user,
+    images: state.global.images
+  }),
+  {
+    updateUser: Actions.updateUser,
+    updateUserImages: Actions.updateUserImages,
+    getImages: Actions.getImages
+  }
+)(EditProfile);

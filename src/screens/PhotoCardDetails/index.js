@@ -1,15 +1,49 @@
 import React, { Component } from "react";
 import { View, Image, Platform } from "react-native";
-import { Container, Content, Text, Grid, Row, Icon, Button } from "native-base";
+import {
+  Container,
+  Content,
+  Text,
+  Grid,
+  Row,
+  Icon,
+  Button,
+  Spinner
+} from "native-base";
 import Swiper from "react-native-swiper";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
 var Dimensions = require("Dimensions");
 var { width, height } = Dimensions.get("window");
 
 class PhotoCardDetails extends Component {
+  state = {
+    images: []
+  };
+  async componentDidMount() {
+    const person = this.props.navigation.getParam("person", null);
+
+    const { getPerson } = this.props;
+    await getPerson(person.uid);
+
+    const res = await API.getImages_API(person.uid);
+    if (res.status) {
+      const images = res.data;
+      this.setState({
+        images: images.filter(image => image.uri != "")
+      });
+    }
+  }
+
   render() {
+    const { person } = this.props;
+
+    if (!person) return <Spinner />;
+
     return (
       <Container style={{ backgroundColor: "#FFF" }}>
         <Content style={{ marginTop: Platform.OS === "ios" ? 20 : undefined }}>
@@ -38,10 +72,14 @@ class PhotoCardDetails extends Component {
               <View style={styles.slideView}>
                 <Image
                   style={styles.image}
-                  source={require("../../../assets/r4.jpg")}
+                  source={
+                    person.image == ""
+                      ? require("../../../assets/launchscreen.png")
+                      : { uri: person.image }
+                  }
                 />
               </View>
-              <View style={styles.slideView}>
+              {/* <View style={styles.slideView}>
                 <Image
                   style={styles.image}
                   source={require("../../../assets/r5.jpg")}
@@ -52,28 +90,33 @@ class PhotoCardDetails extends Component {
                   style={styles.image}
                   source={require("../../../assets/r1.jpeg")}
                 />
-              </View>
+              </View> */}
             </Swiper>
             <Button
               onPress={() => this.props.navigation.goBack()}
               style={styles.backBtn}
             >
-              <Icon name="ios-arrow-back" style={styles.backBtnIcon} />
+              <Icon name="md-arrow-back" style={styles.backBtnIcon} />
             </Button>
           </View>
           <View style={styles.subTextView}>
-            <Text style={styles.nameText}>Rachel McAdams, 26</Text>
-            <Text style={styles.workingText}>Model, Actress</Text>
-            <Text style={styles.distanceAwayText}>3 km away</Text>
-          </View>
-          <View style={styles.quoteView}>
-            <Text style={styles.quoteText}>
-              Good things happen when we meet strangers!! Also, about section
-              here, this is specific user details page
+            <Text style={styles.nameText}>
+              {person.name}, {person.age}
             </Text>
+            {/* <Text style={styles.workingText}>Model, Actress</Text> */}
+            {/* <Text style={styles.distanceAwayText}>3 km away</Text> */}
           </View>
+
+          {person.aboutMe != null ? (
+            <View style={styles.quoteView}>
+              <Text style={styles.quoteText}>{person.aboutMe}</Text>
+            </View>
+          ) : (
+            <React.Fragment />
+          )}
+
           <View style={styles.instagramPhotoCountView}>
-            <Text>200 Instagram Photos</Text>
+            <Text>Photos</Text>
           </View>
           <View>
             <Swiper
@@ -105,32 +148,21 @@ class PhotoCardDetails extends Component {
               loop={false}
             >
               <View style={styles.instagramCarouselView}>
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r3.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r4.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r5.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r6.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r1.jpeg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r2.jpg")}
-                />
+                {Array.isArray(this.state.images) ? (
+                  this.state.images.map(image => {
+                    return (
+                      <Image
+                        style={styles.thumbnail}
+                        source={{ uri: image.uri }}
+                        resizeMode='contain'
+                      />
+                    );
+                  })
+                ) : (
+                  <React.Fragment />
+                )}
               </View>
-              <View style={styles.instagramCarouselView}>
+              {/* <View style={styles.instagramCarouselView}>
                 <Image
                   style={styles.thumbnail}
                   source={require("../../../assets/r2.jpg")}
@@ -207,11 +239,11 @@ class PhotoCardDetails extends Component {
                   style={styles.thumbnail}
                   source={require("../../../assets/r6.jpg")}
                 />
-              </View>
+              </View> */}
             </Swiper>
           </View>
           {/*here*/}
-          <View style={styles.interestTextHeadingView}>
+          {/* <View style={styles.interestTextHeadingView}>
             <Text>3 interests</Text>
           </View>
           <View style={styles.interestsView}>
@@ -224,7 +256,7 @@ class PhotoCardDetails extends Component {
             <Button bordered style={{ margin: 5 }}>
               <Text style={styles.interestText}> Game of Thrones</Text>
             </Button>
-          </View>
+          </View> */}
         </Content>
         <View>
           <Grid style={styles.bottomPillsView}>
@@ -262,4 +294,13 @@ class PhotoCardDetails extends Component {
   }
 }
 
-export default PhotoCardDetails;
+export default connect(
+  state => ({
+    person: state.global.person
+  }),
+  {
+    getPerson: Actions.getPerson
+    // unlike: Actions.unlike,
+    // checkMatch: Actions.checkMatch,
+  }
+)(PhotoCardDetails);

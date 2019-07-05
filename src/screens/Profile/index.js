@@ -3,10 +3,13 @@ import { Image, View, TouchableOpacity } from "react-native";
 import { Container, Content, Icon, Button, Text } from "native-base";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
 class Profile extends Component {
   render() {
     const navigation = this.props.navigation;
+    const { user } = this.props;
     return (
       <Container style={styles.container}>
         <Content scrollEnabled={false}>
@@ -15,7 +18,11 @@ class Profile extends Component {
               onPress={() => navigation.navigate("UserDetails")}
             >
               <Image
-                source={require("../../../assets/federer.jpg")}
+                source={
+                  user.image == ""
+                    ? require("../../../assets/avatar.png")
+                    : { uri: user.image }
+                }
                 style={styles.profileImage}
               />
             </TouchableOpacity>
@@ -27,13 +34,15 @@ class Profile extends Component {
             </TouchableOpacity>
           </View>
           <View style={styles.profileDescriptionView}>
-            <Text style={styles.nameAndAgeText}>Roger Federer, 32yr</Text>
-            <View style={{ padding: 5 }}>
+            <Text style={styles.nameAndAgeText}>
+              {user.name}, {user.age}
+            </Text>
+            {/* <View style={{ padding: 5 }}>
               <Text style={styles.workplaceText}>
                 World Class Tennis Player
               </Text>
-            </View>
-            <Text style={styles.workplaceText}>JCE, Bangalore</Text>
+            </View> */}
+            <Text style={styles.workplaceText}>{user.college}</Text>
 
             <Button
               transparent
@@ -48,7 +57,7 @@ class Profile extends Component {
             </Button>
           </View>
         </Content>
-        <View style={styles.goingOutView}>
+        {/* <View style={styles.goingOutView}>
           <View style={styles.goingOutTextView}>
             <Text style={{ fontSize: 18, fontWeight: "500" }}>
               Going Out Tonight?
@@ -68,10 +77,15 @@ class Profile extends Component {
               <Text style={styles.goingOutBtnText}>I'M GOING OUT</Text>
             </Button>
           </View>
-        </View>
+        </View> */}
       </Container>
     );
   }
 }
 
-export default Profile;
+export default connect(
+  state => ({
+    user: state.global.user
+  }),
+  {}
+)(Profile);

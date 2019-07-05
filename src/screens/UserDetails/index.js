@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
+
 import { View, Image, TouchableOpacity, Platform } from "react-native";
 import { Container, Content, Text, Icon, Button } from "native-base";
 import Swiper from "react-native-swiper";
@@ -7,20 +7,35 @@ import styles from "./styles";
 
 var Dimensions = require("Dimensions");
 var { width, height } = Dimensions.get("window");
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
 class UserDetails extends Component {
+  async componentDidMount() {
+    const { user, images, getImages } = this.props;
+    if (!Array.isArray(images) || images.length == 0) {
+
+      await getImages(user.uid);
+    }
+  }
   render() {
+    const { user, images } = this.props;
+    const imageList = images.filter(item => item.uri != '')
+
+
     const navigation = this.props.navigation;
     return (
       <Container style={{ backgroundColor: "#FFF" }}>
         <Content style={{ marginTop: Platform.OS === "ios" ? 20 : 0 }}>
-          {Platform.OS === "android" &&
+          {Platform.OS === "android" && (
             <Button
               style={styles.createBtn}
               onPress={() => navigation.navigate("EditProfile")}
             >
               <Icon name="md-create" style={{ width: 20, left: -5 }} />
-            </Button>}
+            </Button>
+          )}
           <View style={styles.instagramPhotosCarousel}>
             <Swiper
               style={styles.wrapper}
@@ -33,10 +48,14 @@ class UserDetails extends Component {
               <View style={styles.slide}>
                 <Image
                   style={styles.image}
-                  source={require("../../../assets/rf1.jpg")}
+                  source={
+                    user.image == ""
+                      ? require("../../../assets/launchscreen.png")
+                      : { uri: user.image }
+                  }
                 />
               </View>
-              <View style={styles.slide}>
+              {/* <View style={styles.slide}>
                 <Image
                   style={styles.image}
                   source={require("../../../assets/federerOne.jpg")}
@@ -47,15 +66,16 @@ class UserDetails extends Component {
                   style={styles.image}
                   source={require("../../../assets/rf2.jpg")}
                 />
-              </View>
+              </View> */}
             </Swiper>
-            {Platform.OS === "android" &&
+            {Platform.OS === "android" && (
               <Button
                 style={styles.createBtn}
                 onPress={() => navigation.navigate("EditProfile")}
               >
                 <Icon name="md-create" />
-              </Button>}
+              </Button>
+            )}
             <TouchableOpacity
               onPress={() => navigation.goBack()}
               style={{
@@ -71,7 +91,7 @@ class UserDetails extends Component {
               }}
             >
               <Icon
-                name="ios-arrow-back"
+                name="md-arrow-back"
                 style={{
                   fontSize: 30,
                   marginTop: Platform.OS === "ios" ? 5 : undefined,
@@ -82,8 +102,10 @@ class UserDetails extends Component {
             </TouchableOpacity>
           </View>
           <View style={styles.subText}>
-            <Text style={styles.name}>Roger Federer, 34</Text>
-            <Text style={styles.workingText}>World Class Tennis Player</Text>
+            <Text style={styles.name}>
+              {user.name}, {user.age}
+            </Text>
+            <Text style={styles.workingText}>{user.college}</Text>
             <Button
               style={styles.createBtn}
               onPress={() => navigation.navigate("EditProfile")}
@@ -92,13 +114,10 @@ class UserDetails extends Component {
             </Button>
           </View>
           <View style={styles.quote}>
-            <Text>
-              Good things happen when we meet strangers!! Also, about section
-              here This is specific user details page
-            </Text>
+            <Text>{user.aboutMe}</Text>
           </View>
           <View style={styles.instagramPhotoCount}>
-            <Text>12 Instagram Photos</Text>
+            <Text>Photos</Text>
           </View>
           <View style={styles.thumbnailView}>
             <Swiper
@@ -115,32 +134,22 @@ class UserDetails extends Component {
               loop={false}
             >
               <View style={styles.sixThumbnailsInCarousel}>
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federer.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federerOne.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federer.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federerOne.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federer.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/federerOne.jpg")}
-                />
+                {Array.isArray(imageList) ? (
+                  imageList.map(image => {
+                    
+                    return (
+                      <Image
+                        style={styles.thumbnail}
+                        source={{ uri: image.uri }}
+                        resizeMode='contain'
+                      />
+                    );
+                  })
+                ) : (
+                  <React.Fragment />
+                )}
               </View>
-              <View style={styles.sixThumbnailsInCarousel}>
+              {/* <View style={styles.sixThumbnailsInCarousel}>
                 <Image
                   style={styles.thumbnail}
                   source={require("../../../assets/federerOne.jpg")}
@@ -166,12 +175,13 @@ class UserDetails extends Component {
                   source={require("../../../assets/federer.jpg")}
                 />
               </View>
+             */}
             </Swiper>
           </View>
-          <View style={styles.interestTextHeading}>
+          {/* <View style={styles.interestTextHeading}>
             <Text>3 interests</Text>
-          </View>
-          <View style={styles.interestsView}>
+          </View> */}
+          {/* <View style={styles.interestsView}>
             <View style={styles.interestTextView}>
               <Text style={styles.interestText}> Deepika Padukone</Text>
             </View>
@@ -181,11 +191,22 @@ class UserDetails extends Component {
             <View style={styles.interestTextView}>
               <Text style={styles.interestText}> Game of Thrones</Text>
             </View>
-          </View>
+          </View> */}
         </Content>
       </Container>
     );
   }
 }
 
-export default connect()(UserDetails);
+export default connect(
+  state => ({
+    user: state.global.user,
+    images: state.global.images
+  }),
+  {
+    // getPerson: Actions.getPerson
+    // unlike: Actions.unlike,
+    // checkMatch: Actions.checkMatch,
+    getImages: Actions.getImages
+  }
+)(UserDetails);

@@ -1,9 +1,13 @@
-import { store, auth } from "../constants/database";
+import { store, auth, firebase } from "../constants/database";
+
 import uuid from "uuid";
 import moment from "moment";
 import Axios from "axios";
 import superagent from "superagent";
-const API_KEY = ""; 
+import config from "../constants/config";
+import { Facebook } from "expo";
+
+const API_KEY = "";
 
 export const signInWithFacebook1 = async () => {
   try {
@@ -38,41 +42,43 @@ export const signInWithFacebook1 = async () => {
         providerData
       } = facebookProfileData.user;
 
-      const id = uuid();
       let ref = store.collection("users").doc(uid);
 
       const ss = await ref.get();
 
+      let item = {};
+
       if (!ss.exists) {
-        const item = {
+        item = {
           name: displayName,
           age: 0,
           college: "",
-          image: '',
+          image: "",
           num: 0,
           email,
           fb_uid: providerData[0].uid,
-          uid
+          uid,
+          gender: ""
         };
+
         ref.set(item);
 
         //return user;
-      } 
+      } else {
+        item = ss.data();
+      }
 
-      return { status: true, data: item }
+      return { status: true, data: item };
     }
     case "cancel": {
-      return { status: false }
+      return { status: false };
     }
   }
 };
 
 export const getUsers_API = async () => {
   try {
-   
-    let ref = store
-      .collection("users")
-   
+    let ref = store.collection("users");
 
     const querySS = await ref.get();
 
@@ -84,15 +90,16 @@ export const getUsers_API = async () => {
     }
 
     const users = querySS.docs.map(docSS => {
-      const user = docSS.data()
-      if(user.uid != auth.currentUser.uid)
+      const user = docSS.data();
+      if (user.uid != auth.currentUser.uid && user.showMeOnApp) {
         return user;
-      return {}
+      }
+      return null;
     });
 
     return {
       status: true,
-      data: users
+      data: users.filter(i => i != null)
     };
   } catch (error) {
     console.log(error);
@@ -103,10 +110,40 @@ export const getUsers_API = async () => {
   }
 };
 
-export const getUser_API = async (uid) => {
+export const getMatchings_API = async uid => {
   try {
-    
+    const querySS = await store
+      .collection("users")
+      .doc(uid)
+      .collection("matchings")
+      .get();
 
+    if (querySS.empty) {
+      return {
+        status: false,
+        message: "No data found"
+      };
+    }
+
+    const matchings = querySS.docs.map(docSS => {
+      return docSS.data();
+    });
+
+    return {
+      status: true,
+      data: matchings
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const getUser_API = async uid => {
+  try {
     let ref = store.collection("users").doc(uid);
 
     const docSS = await ref.get();
@@ -119,10 +156,10 @@ export const getUser_API = async (uid) => {
     }
     return {
       status: true,
-      data: docSS
+      data: docSS.data()
     };
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     return {
       status: false,
       message: "ERROR: " + error.message
@@ -165,90 +202,6 @@ export const getUsersNearby_API = async ({ long, lat }) => {
     return {
       status: true,
       data: users
-    };
-  } catch (error) {
-    console.log(error);
-    return {
-      status: false,
-      message: "ERROR: " + error.message
-    };
-  }
-};
-
-export const getUsersInVenue_API = async ({ long, lat }) => {
-  try {
-    // ~1 mile of lat and lon in degrees
-
-    let ref = store
-      .collection("users")
-      .where("lat", "==", Number(lat))
-      .where("long", "==",  Number(long));
-
-    const querySS = await ref.get();
-
-    if (querySS.empty) {
-      return {
-        status: false,
-        message: "No data found"
-      };
-    }
-
-   
-
-    const users = querySS.docs.map(docSS => {
-      // const user = docSS.data()
-      // if(user != email)
-      return docSS.data();
-    });
-
-    return {
-      status: true,
-      data: users
-    };
-  } catch (error) {
-    console.log(error);
-    return {
-      status: false,
-      message: "ERROR: " + error.message
-    };
-  }
-};
-
-export const getVenueNearby_API = async ({ long, lat }) => {
-  try {
-    // ~1 mile of lat and lon in degrees
-    let lat1 = 0.0144927536231884;
-    let long1 = 0.0181818181818182;
-
-    let lowerLat = lat - lat1 * 10;
-    let lowerLon = long - long1 * 10;
-
-    let greaterLat = lat + lat1 * 10;
-    let greaterLon = long + long1 * 10;
-
-    let ref = store
-      .collection("venues")
-      .where("lat", ">=", lowerLat)
-      .where("lat", "<=", greaterLat);
-
-    const querySS = await ref.get();
-
-    if (querySS.empty) {
-      return {
-        status: false,
-        message: "No data found"
-      };
-    }
-
-    const venues = querySS.docs.map(docSS => {
-      // const user = docSS.data()
-      // if(user != email)
-      return docSS.data();
-    });
-
-    return {
-      status: true,
-      data: venues
     };
   } catch (error) {
     console.log(error);
@@ -348,43 +301,12 @@ export const getMatchingUsersNearby_API = async ({
   }
 };
 
-// {
-//   email,
-//   age,
-//   gender,
-//   genderTarget,
-//   interesting,
-//   ageMin,
-//   ageMax,
-//   dob,
-//   credit,
-//   status,
-//   profile,
-//   type,
-//   long,
-//   lat,
-//   checkInAt,
-// }
-
-export const updUser_API = async (email, udpUser) => {
+export const updUser_API = async (uid, udpUser) => {
   try {
-    let querySS = await store
-      .collection("users")
-      .where("email", "==", email)
-      .get();
+    let ref = store.collection("users").doc(uid);
 
-    // console.log(querySS, email)
-    if (querySS.empty) {
-      return {
-        status: false,
-        message: "No user found for this email/username: " + email
-      };
-    }
-
-    //console.log(querySS.docs)
-
-    const ref = querySS.docs[0].ref;
-    const data = querySS.docs[0].data();
+    const docSS = await ref.get();
+    const data = docSS.data();
 
     const newUser = {
       ...data,
@@ -406,33 +328,233 @@ export const updUser_API = async (email, udpUser) => {
   }
 };
 
-export const updCredit_API = async (email, creditChange) => {
+export const updUserImages_API = async (uid, image, uri) => {
   try {
-    let querySS = await store
+    let ref = store
       .collection("users")
-      .where("email", "==", email)
+      .doc(uid)
+      .collection("images")
+      .doc(image);
+
+    const ss = await ref.get();
+
+    if (!ss.exists) {
+      // console.log('checkMatch_API', who)
+      const item = {
+        uri: uri,
+        id: image
+      };
+      ref.set(item);
+    }else{
+      const item = {
+        uri: uri,
+        id: image
+      };
+      ref.update(item);
+    }
+
+    const querySS = await store
+      .collection("users")
+      .doc(uid)
+      .collection("images")
+      .get();
+
+    const images = querySS.docs.map(docSS => {
+      return docSS.data();
+    });
+
+    return {
+      status: true,
+      data: images
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const getImages_API = async uid => {
+  try {
+    const querySS = await store
+      .collection("users")
+      .doc(uid)
+      .collection("images")
       .get();
 
     if (querySS.empty) {
       return {
         status: false,
-        message: "No user found for this email/username: " + email
+        message: "No data found"
       };
     }
 
-    const ref = querySS.docs[0].ref;
-    const data = querySS.docs[0].data();
-
-    const newUser = {
-      ...data,
-      credit: data.credit + creditChange
-    };
-
-    await ref.update(newUser);
+    const images = querySS.docs.map(docSS => {
+      return docSS.data();
+    });
 
     return {
       status: true,
-      data: newUser
+      data: images
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const like_API = async (uid, who, supperLike) => {
+  try {
+    let ref = store
+      .collection("users")
+      .doc(uid)
+      .collection("likes")
+      .doc(who.uid);
+
+    const ss = await ref.get();
+
+    if (!ss.exists) {
+      const item = {
+        name: who.name,
+        age: who.age,
+        email: who.email,
+        uid: who.uid,
+        supperLike
+      };
+      ref.set(item);
+    }
+
+    const querySS = await store
+      .collection("users")
+      .doc(uid)
+      .collection("likes")
+      .get();
+
+    const likes = querySS.docs.map(docSS => {
+      return docSS.data();
+    });
+
+    return {
+      status: true,
+      data: likes
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const unlike_API = async (uid, who) => {
+  try {
+    let ref = store
+      .collection("users")
+      .doc(uid)
+      .collection("unlikes")
+      .doc(who.uid);
+
+    const ss = await ref.get();
+
+    if (!ss.exists) {
+      const item = {
+        name: who.name,
+        age: who.age,
+        email: who.email,
+        uid: who.uid
+      };
+      ref.set(item);
+    }
+
+    const querySS = await store
+      .collection("users")
+      .doc(uid)
+      .collection("unlikes")
+      .get();
+
+    const unlikes = querySS.docs.map(docSS => {
+      return docSS.data();
+    });
+
+    return {
+      status: true,
+      data: unlikes
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const checkMatch_API = async (uid, who) => {
+  try {
+    let refPerson = store
+      .collection("users")
+      .doc(who.uid)
+      .collection("likes")
+      .doc(uid);
+
+    const ss = await refPerson.get();
+
+    if (!ss.exists ) {
+      // console.log('checkMatch_API', who)
+      const match = {
+        name: who.name,
+        age: who.age,
+        email: who.email,
+        uid: who.uid,
+        image: who.image,
+      };
+      let ref = store
+        .collection("users")
+        .doc(uid)
+        .collection("matchings")
+        .doc(who.uid);
+      ref.set(match);
+
+      //reverse
+      const docMe = await store
+        .collection("users")
+        .doc(uid)
+        .get();
+      const me = docMe.data();
+      const matchMe = {
+        name: me.name,
+        age: me.age,
+        email: me.email,
+        uid: me.uid,
+        image: me.image,
+      };
+      let refPerson = store
+        .collection("users")
+        .doc(who.uid)
+        .collection("matchings")
+        .doc(uid);
+      refPerson.set(matchMe);
+    }
+
+    const querySS = await store
+      .collection("users")
+      .doc(uid)
+      .collection("matchings")
+      .get();
+
+    const matchings = querySS.docs.map(docSS => {
+      return docSS.data();
+    });
+
+    return {
+      status: true,
+      data: matchings
     };
   } catch (error) {
     console.log(error);
@@ -577,5 +699,41 @@ export const fetchLocations = async gpsLoc => {
     return list;
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const uploadImage = async (uid, uri, imageName) => {
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    var ref = firebase
+      .storage()
+      .ref()
+      .child(`images/${uid}/${imageName}`);
+    const res = await ref.put(blob);
+
+    return res.ref.getDownloadURL();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteImage = async (uid, imageName) => {
+  try {
+    var ref = firebase
+      .storage()
+      .ref()
+      .child(`images/${uid}/${imageName}`);
+
+    const uri = await ref.getDownloadURL();
+
+    if (uri.length > 0) {
+      ref.delete();
+      return 'File Deleted'
+    } else return "File Not Found";
+  } catch (error) {
+    console.log(error);
+    return null;
   }
 };

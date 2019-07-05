@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import {connect} from "react-redux";
 import {
   View,
   Text,
@@ -22,6 +21,10 @@ import {GiftedChat, Actions, Bubble, Send} from "react-native-gifted-chat";
 import CustomActions from "./CustomActions";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
+import Fire from './Fire';
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+// import * as Actions from "../../redux/action";
 
 var {height} = Dimensions.get("window");
 
@@ -48,46 +51,75 @@ class chatScreen extends Component {
     this.userName = this.props.navigation.state.params.name;
   }
 
+  get person() {
+    const { person } = this.props.navigation.state.params
+    return {
+      name: person.name,
+      _id: person.uid,
+    };
+  }
+
+  get user() {
+    const { user } = this.props
+    return {
+      name: user.name,
+      _id: user.uid,
+    };
+  }
+
   componentWillMount() {
     this._isMounted = true;
     this.setState(() => {
       return {
-        messages: require("./data.js")
+        messages: []
       };
     });
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
+
+  async componentDidMount() {
+    // setTimeout(() => {
+    //   this.setState({show: true});
+    // }, 600);
+    const { person } = this.props.navigation.state.params
+    const { user } = this.props
+
+    await Fire.shared.init(user.uid, person.uid )
+
+    Fire.shared.on(messages =>
+      this.setState(previousState => ({
+        messages: GiftedChat.append(previousState.messages, messages),
+      }))
+    );
+    this.setState({show: true});
   }
 
-  componentDidMount() {
-    setTimeout(() => {
-      this.setState({show: true});
-    }, 600);
+  componentWillUnmount() {
+    this._isMounted = false;
+    Fire.shared.off();
   }
 
   onLoadEarlier() {
     this.setState(previousState => {
       return {
-        isLoadingEarlier: true
+        isLoadingEarlier: false
       };
     });
 
-    setTimeout(() => {
-      if (this._isMounted === true) {
-        this.setState(previousState => {
-          return {
-            messages: GiftedChat.prepend(
-              previousState.messages,
-              require("./old.js")
-            ),
-            loadEarlier: false,
-            isLoadingEarlier: false
-          };
-        });
-      }
-    }, 1000); // simulating network
+    // setTimeout(() => {
+    //   if (this._isMounted === true) {
+    //     this.setState(previousState => {
+    //       return {
+    //         messages: GiftedChat.prepend(
+    //           previousState.messages,
+    //           require("./old.js")
+    //         ),
+    //         loadEarlier: false,
+    //         isLoadingEarlier: false
+    //       };
+    //     });
+    //   }
+    // }, 1000); // simulating network
   }
 
   onSend(messages = []) {
@@ -98,7 +130,7 @@ class chatScreen extends Component {
     });
 
     // for demo purpose
-    this.answerDemo(messages);
+    //this.answerDemo(messages);
   }
 
   answerDemo(messages) {
@@ -240,7 +272,7 @@ class chatScreen extends Component {
                 transparent
                 onPress={() => this.props.navigation.goBack()}
               >
-                <Icon name="ios-arrow-back" />
+                <Icon name="md-arrow-back" />
               </Button>
             </Left>
             <Body style={{flex:3}}>
@@ -253,13 +285,15 @@ class chatScreen extends Component {
           <View style={{flex: 1}}>
             <GiftedChat
               messages={this.state.messages}
-              onSend={this.onSend}
-              loadEarlier={this.state.loadEarlier}
-              onLoadEarlier={this.onLoadEarlier}
-              isLoadingEarlier={this.state.isLoadingEarlier}
-              user={{
-                _id: 1 // sent messages should have same user._id
-              }}
+              //onSend={this.onSend}
+              onSend={Fire.shared.send}
+              //loadEarlier={this.state.loadEarlier}
+             // onLoadEarlier={this.onLoadEarlier}
+              //isLoadingEarlier={this.state.isLoadingEarlier}
+              //user={{
+              //  _id: 1 // sent messages should have same user._id
+              //}}
+              user={this.user}
               renderActions={this.renderCustomActions}
               renderBubble={this.renderBubble}
               renderFooter={this.renderFooter}
@@ -273,4 +307,10 @@ class chatScreen extends Component {
   }
 }
 
-export default connect()(chatScreen);
+export default connect(
+  state => ({
+    user: state.global.user,
+  }),
+  {
+  }
+)(chatScreen);

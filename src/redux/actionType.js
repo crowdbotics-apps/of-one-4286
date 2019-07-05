@@ -3,3 +3,21 @@ export const GET_USER_NOK = 'GET_USER_NOK'
 
 export const LOGIN_OK = 'LOGIN_OK'
 export const LOGIN_NOK = 'LOGIN_NOK'
+
+export const UPDATE_LIKE_OK = 'UPDATE_LIKE_OK'
+export const UPDATE_LIKE_NOK = 'UPDATE_LIKE_NOK'
+
+export const UPDATE_UNLIKE_OK = 'UPDATE_UNLIKE_OK'
+export const UPDATE_UNLIKE_NOK = 'UPDATE_UNLIKE_NOK'
+
+export const UPDATE_USER_OK = 'UPDATE_USER_OK'
+export const UPDATE_USER_NOK = 'UPDATE_USER_NOK'
+
+export const UPDATE_MATCH_OK = 'UPDATE_MATCH_OK'
+export const UPDATE_MATCH_NOK = 'UPDATE_MATCH_NOK'
+
+export const GET_PERSON_OK = 'GET_PERSON_OK'
+export const GET_PERSON_NOK = 'GET_PERSON_NOK'
+
+export const UPDATE_IMAGES_OK = 'UPDATE_IMAGES_OK'
+export const UPDATE_IMAGES_NOK = 'UPDATE_IMAGES_NOK'

@@ -6,19 +6,38 @@ import styles from "./styles";
 import commonColor from "../../theme/variables/commonColor";
 import {signInWithFacebook} from '../../services/Authentication'
 import {alert} from '../../services/Alert'
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
+
 
 var deviceHeight = Dimensions.get("window").height;
 
 class Login extends Component {
   onLoginWithFB = async () => {
-    const res = await signInWithFacebook()
-    if(res.type == 'success')
+    const {loginFB, user} = this.props
+
+    const res = await loginFB()
+
+
+    console.log('res, user', res, user)
+
+    if(res.type == 'LOGIN_OK')
       this.props.navigation.navigate("HomeTabNavigation");
     else 
       alert('Login failed!')
+    
+    // const res = await signInWithFacebook()
+
+    // if(res.type == 'success')
+    //   this.props.navigation.navigate("HomeTabNavigation");
+    // else 
+    //   alert('Login failed!')
   };
 
+
+
   render() {
+    
     return (
       <Container style={{ backgroundColor: "#fff" }}>
         <StatusBar
@@ -121,4 +140,11 @@ class Login extends Component {
   }
 }
 
-export default Login;
+export default connect(
+  state => ({
+    user: state.global.user,
+  }),
+  {
+    loginFB: Actions.loginFB,
+  }
+)(Login);

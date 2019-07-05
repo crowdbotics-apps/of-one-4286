@@ -66,7 +66,7 @@ class CurrentWork extends Component {
         <Header>
           <Left>
             <Button transparent onPress={() => this.props.navigation.goBack()}>
-              <Icon name="ios-arrow-back-outline" />
+              <Icon name="md-arrow-back" />
             </Button>
           </Left>
           <Body>

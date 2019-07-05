@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
-import { Text } from "react-native";
+
+import { Text, FlatList } from "react-native";
 import {
   Container,
   Content,
@@ -12,28 +12,50 @@ import {
   Thumbnail,
   Left,
   Right,
-  Body,
-  List
+  Body
 } from "native-base";
 import { NavigationActions } from "react-navigation";
 import styles from "./styles";
-import data from "./data";
+// import data from "./data";
+import * as API from "../../services/Api";
+import { connect } from "react-redux";
+import * as Actions from "../../redux/action";
 
-const navigateAction = name =>
+const navigateAction = person =>
   NavigationActions.navigate({
     routeName: "ChatScreen",
-    params: { name: name }
+    params: { person: person }
   });
 
 class ChatList extends Component {
+  async componentDidMount() {
+    await this.props.getMatchings(this.props.user.uid);
+
+    if (!(this.props.matchings.length > 0))
+      this.props.navigation.navigate("Chat");
+  }
+
   render() {
     const navigation = this.props.navigation;
+    const { matchings } = this.props;
+
+    const data = matchings.map(item => {
+      return {
+        name: item.name,
+        distance: "",
+        thumbnail: !item.image
+          ? require("../../../assets/avatar.png")
+          : { uri: item.image } ,
+        uid: item.uid,
+      };
+    });
+
     return (
       <Container style={{ backgroundColor: "#FFF" }}>
         <Header>
           <Left>
             <Button transparent onPress={() => navigation.goBack()}>
-              <Icon name="ios-arrow-back" />
+              <Icon name="md-arrow-back" />
             </Button>
           </Left>
           <Body>
@@ -42,30 +64,28 @@ class ChatList extends Component {
           <Right />
         </Header>
         <Content>
-          <List
+          <FlatList
             removeClippedSubviews={false}
             style={{ marginTop: 7 }}
-            dataArray={data}
-            renderRow={dataRow =>
+            data={data}
+            renderItem={({ item }) => (
               <ListItem
                 avatar
                 button
                 style={{ marginLeft: 15 }}
-                onPress={() =>
-                  navigation.dispatch(navigateAction(dataRow.name))}
+                onPress={() => navigation.dispatch(navigateAction(item))}
               >
                 <Left>
-                  <Thumbnail round source={dataRow.thumbnail} />
+                  <Thumbnail round source={item.thumbnail} />
                 </Left>
                 <Body>
-                  <Text style={styles.userNameText}>
-                    {dataRow.name}
-                  </Text>
-                  <Text style={styles.distanceText}>
+                  <Text style={styles.userNameText}>{item.name}</Text>
+                  {/* <Text style={styles.distanceText}>
                     {dataRow.distance}
-                  </Text>
+                  </Text> */}
                 </Body>
-              </ListItem>}
+              </ListItem>
+            )}
           />
         </Content>
       </Container>
@@ -73,4 +93,12 @@ class ChatList extends Component {
   }
 }
 
-export default connect()(ChatList);
+export default connect(
+  state => ({
+    matchings: state.global.matchings,
+    user: state.global.user
+  }),
+  {
+    getMatchings: Actions.getMatchings
+  }
+)(ChatList);
