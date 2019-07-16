@@ -28,7 +28,8 @@ class PhotoCard extends Component {
     this.state = {
       direction: null,
       opac: 0,
-      users: []
+      users: [],
+      loading: false,
     };
   }
 
@@ -50,14 +51,19 @@ class PhotoCard extends Component {
       long: location.coords.longitude
     });
 
-    //console.log(location);
+    return location
   };
 
   async componentDidMount() {
-    await this._getLocationAsync();
+    this.setState({loading: true})
+    const location = await this._getLocationAsync();
+    const { latitude, longitude } = location.coords
 
     const { unlikes, user } = this.props;
-    const resUsers = await API.getUsers_API();
+    const resUsers = await API.getUsersNearby_API({long: longitude, lat: latitude}, user.distance);
+
+
+
     let users = [];
     if (resUsers.status) {
       users = resUsers.data;
@@ -71,13 +77,16 @@ class PhotoCard extends Component {
 
       if (!user.showMeMen) users = users.filter(item => item.gender != "male");
 
-      this.setState({ users });
+      // console.log('users ',users)
+
+      this.setState({ users, loading: false, longitude, latitude });
     }
   }
 
   onRefresh = async () => {
-    const resUsers = await API.getUsers_API();
+    // const resUsers = await API.getUsers_API();
     const { unlikes, user } = this.props;
+    const resUsers = await API.getUsersNearby_API({long: this.state.longitude, lat: this.state.latitude}, user.distance);
 
     let users = [];
     if (resUsers.status) {
@@ -95,14 +104,14 @@ class PhotoCard extends Component {
       if (!user.showMeMen) users = users.filter(item => item.gender != "male");
 
       console.log("users", users, this.props.unlikes);
-      if (Array.isArray(users) && users.length > 1) {
+      if (Array.isArray(users) && users.length > 0) {
         this._deckSwiper._root.setState({
           lastCard: false,
           card1Top: true,
           card2Top: true,
           disabled: false,
           selectedItem: users[0],
-          selectedItem2: users[1]
+          //selectedItem2: users[1]
         });
 
         this.setState({ users });
@@ -174,7 +183,7 @@ class PhotoCard extends Component {
     //const data1 = users.filter(item => item.uid != null);
 
     const navigation = this.props.navigation;
-    if (users.length == 0) return <Spinner />;
+    if (this.state.loading) return <Spinner />;
 
     // if (users.length < 2) return <Text>No user found.</Text>;
 

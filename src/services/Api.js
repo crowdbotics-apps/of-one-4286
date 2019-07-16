@@ -167,17 +167,19 @@ export const getUser_API = async uid => {
   }
 };
 
-export const getUsersNearby_API = async ({ long, lat }) => {
+export const getUsersNearby_API = async ({ long, lat }, mile) => {
   try {
     // ~1 mile of lat and lon in degrees
     let lat1 = 0.0144927536231884;
     let long1 = 0.0181818181818182;
 
-    let lowerLat = lat - lat1 * 10;
-    let lowerLon = long - long1 * 10;
+    let lowerLat = lat - lat1 * mile;
+    let lowerLon = long - long1 * mile;
 
-    let greaterLat = lat + lat1 * 10;
-    let greaterLon = long + long1 * 10;
+    let greaterLat = lat + lat1 * mile;
+    let greaterLon = long + long1 * mile;
+
+    // console.log('lowerLat, greaterLat', lowerLat, greaterLat)
 
     let ref = store
       .collection("users")
@@ -187,6 +189,7 @@ export const getUsersNearby_API = async ({ long, lat }) => {
     const querySS = await ref.get();
 
     if (querySS.empty) {
+      // console.log('lquerySS.empty', querySS.empty)
       return {
         status: false,
         message: "No data found"
@@ -194,14 +197,21 @@ export const getUsersNearby_API = async ({ long, lat }) => {
     }
 
     const users = querySS.docs.map(docSS => {
-      // const user = docSS.data()
-      // if(user != email)
-      return docSS.data();
+      const user = docSS.data();
+      
+      if (user.uid != auth.currentUser.uid && user.showMeOnApp) {
+        // console.log('lusers querySS.docs',user)
+        return user;
+      }
+      return null;
     });
+
+
+     
 
     return {
       status: true,
-      data: users
+      data: users.filter(i => i != null)
     };
   } catch (error) {
     console.log(error);
