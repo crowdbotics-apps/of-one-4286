@@ -38,5 +38,16 @@ export default {
   },
   inActiveIcon: {
     color: "#D9E0E4"
+  },
+  bottomTab: {
+    height: 100,
+    width: '100%',
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    backgroundColor: "#ffffff",
+    position: 'absolute',
+    bottom: 0,
   }
 };

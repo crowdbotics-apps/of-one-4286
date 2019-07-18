@@ -1,6 +1,6 @@
 import React from "react";
 import { createBottomTabNavigator } from "react-navigation";
-import { Icon, Header, FooterTab, Button, Thumbnail } from "native-base";
+import { Icon, Header, FooterTab, Button, Thumbnail, Footer } from "native-base";
 import Profile from "../Profile";
 import PhotoCard from "../PhotoCard";
 import Chat from "../Chat";
@@ -19,16 +19,15 @@ const HomeTabNavigation = createBottomTabNavigator(
     lazy: true,
     tabBarComponent: props => {
       return (
-        <Header>
-          <FooterTab>
+        <Footer>
+          <FooterTab style={styles.bottomTab}>
             <Button onPress={() => props.navigation.navigate("Profile")}>
-              <Icon
-                name="md-person"
-                size={20}
-                style={
+              <Thumbnail
+                small
+                source={
                   props.navigation.state.index === 0
-                    ? styles.activeIcon
-                    : styles.inActiveIcon
+                    ? require("../../../assets/logo.png")
+                    : require("../../../assets/profile1.png")
                 }
               />
             </Button>
@@ -45,17 +44,17 @@ const HomeTabNavigation = createBottomTabNavigator(
             </Button>
 
             <Button onPress={() => props.navigation.navigate("Chat")}>
-              <Icon
-                name="md-chatboxes"
-                style={
+              <Thumbnail
+                small
+                source={
                   props.navigation.state.index === 2
-                    ? styles.activeIcon
-                    : styles.inActiveIcon
+                    ? require("../../../assets/logo.png")
+                    : require("../../../assets/chat1.png")
                 }
               />
             </Button>
           </FooterTab>
-        </Header>
+        </Footer>
       );
     }
   }
