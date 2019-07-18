@@ -59,6 +59,10 @@ class VerifyChurch extends Component {
     this.props.navigation.navigate('HomeTabNavigation')
   }
 
+  onPrevious = () => {
+    this.props.navigation.goBack()
+  }
+
   render() {
     return (
       <Container style={{ backgroundColor: "#f2f2f2" }}>
@@ -102,7 +106,7 @@ class VerifyChurch extends Component {
               block
               rounded
               style={styles.button}
-              onPress={this.onLoginWithFB}
+              onPress={this.onPrevious}
             >
               <Text style={styles.buttonText}>PREVIOUS</Text>
             </Button>
