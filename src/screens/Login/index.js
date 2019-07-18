@@ -25,7 +25,7 @@ class Login extends Component {
     console.log("res, user", res, user);
 
     if (res.type == "LOGIN_OK")
-      this.props.navigation.navigate("HomeTabNavigation");
+      this.props.navigation.navigate("VerifyBirthday");
     else alert("Login failed!");
 
     // const res = await signInWithFacebook()
@@ -42,7 +42,7 @@ class Login extends Component {
         source={require("../../../assets/background.png")}
         style={{ width: "100%", height: "100%" }}
       >
-        <Container style={{ backgroundColor: "#00000070" }}>
+        <Container style={{ backgroundColor: "#00000099" }}>
           <Content scrollEnabled={false} contentContainerStyle={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             {/* <Swiper
             height={deviceHeight / 1.3}
@@ -116,8 +116,8 @@ class Login extends Component {
           </Swiper>*/}
 
             <View >
-              <Text>Of One</Text>
-              <Text>A dating app for Coptics, by Coptics</Text>
+              <Text style={styles.brand}>Of One</Text>
+              <Text style={styles.subBrand}>A dating app for Coptics, by Coptics</Text>
             </View>
             <Button
               block
@@ -125,9 +125,9 @@ class Login extends Component {
               style={styles.loginBtn}
               onPress={this.onLoginWithFB}
             >
-              <Text style={styles.loginBtnText}>LOG IN WITH FACEBOOK</Text>
+              <Text style={styles.loginBtnText}>CONTINUE WITH FACEBOOK</Text>
             </Button>
-            <Text>We’ll never post anything</Text>
+            <Text style={styles.note}>We’ll never post anything</Text>
           </Content>
           {/* <View style={styles.noteView}>
           <Text style={styles.noteText}>

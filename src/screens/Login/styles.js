@@ -69,9 +69,7 @@ export default {
     width: deviceWidth - 60,
     alignSelf: "center",
     backgroundColor: "#3B5998",
-   
-    
-    
+    marginTop: 150
   },
   loginBtnText: {
     fontSize: 15,
@@ -85,5 +83,33 @@ export default {
     color: commonColor.lightTextColor,
     fontSize: 12,
     textAlign: "center"
+  },
+  brand: {
+    height: 71,
+    color: "#ffffff",
+    fontFamily: "Lato",
+    fontSize: 17,
+    fontStyle: "italic",
+    // Text style for "Of One"
+    fontFamily: "Lato_Bold",
+    fontSize: 48,
+    fontWeight: "700",
+    textAlign: "center"
+  },
+  subBrand: {
+    height: 71,
+    color: "#ffffff",
+    fontFamily: "Lato",
+    fontSize: 17,
+    fontStyle: "italic"
+  },
+  note: {
+    height: 15,
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 10,
+    fontWeight: "400",
+    letterSpacing: 0.05,
+    width: deviceWidth - 70
   }
 };
