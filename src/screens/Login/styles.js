@@ -68,7 +68,10 @@ export default {
   loginBtn: {
     width: deviceWidth - 60,
     alignSelf: "center",
-    backgroundColor: "#3B5998"
+    backgroundColor: "#3B5998",
+   
+    
+    
   },
   loginBtnText: {
     fontSize: 15,

@@ -14,6 +14,9 @@ import CurrentWork from "./screens/EditProfile/currentWork";
 import School from "./screens/EditProfile/school";
 import AddPhoto from "./screens/EditProfile/addphoto";
 import Loading from "./screens/Loading";
+import VerifyBirthday from "./screens/VerifyBirthday";
+import VerifyGender from "./screens/VerifyGender";
+import VerifyChurch from "./screens/VerifyChurch";
 
 const App = createStackNavigator(
   {
@@ -29,6 +32,9 @@ const App = createStackNavigator(
     School: { screen: School },
     PhotoCardDetails: { screen: PhotoCardDetails },
     Loading: { screen: Loading },
+    VerifyBirthday: { screen: VerifyBirthday },
+    VerifyGender: { screen: VerifyGender },
+    VerifyChurch: { screen: VerifyChurch },
   },
   {
     index: 0,

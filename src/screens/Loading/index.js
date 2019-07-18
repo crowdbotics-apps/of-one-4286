@@ -26,7 +26,15 @@ class LoadingScreen extends Component {
         //console.log('loading user: ', user )
         if (user ) {
           await this.props.getUser(user.uid)
-          this.props.navigation.navigate('HomeTabNavigation');
+          if(user.dob == null)
+            this.props.navigation.navigate('VerifyBirthday');
+          else if(user.gender == null )
+            this.props.navigation.navigate('VerifyGender');
+          else if(user.church == null )
+            this.props.navigation.navigate('VerifyChurch');
+          else 
+            this.props.navigation.navigate('HomeTabNavigation');
+            
         } else {
           this.props.navigation.navigate('Login');
         }

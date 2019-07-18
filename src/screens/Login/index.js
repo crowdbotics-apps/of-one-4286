@@ -1,54 +1,50 @@
 import React, { Component } from "react";
-import { Dimensions, Image, StatusBar, Platform } from "react-native";
+import {
+  Dimensions,
+  Image,
+  StatusBar,
+  Platform,
+  ImageBackground
+} from "react-native";
 import { Container, Content, Text, Button, View } from "native-base";
 import Swiper from "react-native-swiper";
 import styles from "./styles";
 import commonColor from "../../theme/variables/commonColor";
-import {alert} from '../../services/Alert'
+import { alert } from "../../services/Alert";
 import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
-
 
 var deviceHeight = Dimensions.get("window").height;
 
 class Login extends Component {
   onLoginWithFB = async () => {
-    const {loginFB, user} = this.props
+    const { loginFB, user } = this.props;
 
-    const res = await loginFB()
+    const res = await loginFB();
 
+    console.log("res, user", res, user);
 
-    console.log('res, user', res, user)
-
-    if(res.type == 'LOGIN_OK')
+    if (res.type == "LOGIN_OK")
       this.props.navigation.navigate("HomeTabNavigation");
-    else 
-      alert('Login failed!')
-    
+    else alert("Login failed!");
+
     // const res = await signInWithFacebook()
 
     // if(res.type == 'success')
     //   this.props.navigation.navigate("HomeTabNavigation");
-    // else 
+    // else
     //   alert('Login failed!')
   };
 
-
-
   render() {
-    
     return (
-      <Container style={{ backgroundColor: "#fff" }}>
-        <StatusBar
-          backgroundColor={
-            Platform.OS === "android"
-              ? commonColor.statusBarColor
-              : "transparent"
-          }
-          barStyle="dark-content"
-        />
-        <Content scrollEnabled={false}>
-          <Swiper
+      <ImageBackground
+        source={require("../../../assets/background.png")}
+        style={{ width: "100%", height: "100%" }}
+      >
+        <Container style={{ backgroundColor: "#00000070" }}>
+          <Content scrollEnabled={false} contentContainerStyle={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            {/* <Swiper
             height={deviceHeight / 1.3}
             loop={false}
             dot={<View style={styles.swiperDot} />}
@@ -117,33 +113,39 @@ class Login extends Component {
                 resizeMode="contain"
               />
             </View>
-          </Swiper>
+          </Swiper>*/}
 
-          <Button
-            block
-            rounded
-            style={styles.loginBtn}
-            onPress={this.onLoginWithFB}
-          >
-            <Text style={styles.loginBtnText}>LOG IN WITH FACEBOOK</Text>
-          </Button>
-        </Content>
-        <View style={styles.noteView}>
+            <View >
+              <Text>Of One</Text>
+              <Text>A dating app for Coptics, by Coptics</Text>
+            </View>
+            <Button
+              block
+              rounded
+              style={styles.loginBtn}
+              onPress={this.onLoginWithFB}
+            >
+              <Text style={styles.loginBtnText}>LOG IN WITH FACEBOOK</Text>
+            </Button>
+            <Text>We’ll never post anything</Text>
+          </Content>
+          {/* <View style={styles.noteView}>
           <Text style={styles.noteText}>
             By signing in, you agree with our terms of services and privacy
             settings
           </Text>
-        </View>
-      </Container>
+        </View> */}
+        </Container>
+      </ImageBackground>
     );
   }
 }
 
 export default connect(
   state => ({
-    user: state.global.user,
+    user: state.global.user
   }),
   {
-    loginFB: Actions.loginFB,
+    loginFB: Actions.loginFB
   }
 )(Login);
