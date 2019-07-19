@@ -99,6 +99,8 @@ class PhotoCardDetails extends Component {
               <Icon name="md-arrow-back" style={styles.backBtnIcon} />
             </Button>
           </View>
+          
+          
           <View style={styles.subTextView}>
             <Text style={styles.nameText}>
               {person.name}, {person.age}
@@ -162,84 +164,7 @@ class PhotoCardDetails extends Component {
                   <React.Fragment />
                 )}
               </View>
-              {/* <View style={styles.instagramCarouselView}>
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r2.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r6.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r3.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r1.jpeg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r4.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r5.jpg")}
-                />
-              </View>
-              <View style={styles.instagramCarouselView}>
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r6.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r5.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r4.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r3.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r2.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r1.jpeg")}
-                />
-              </View>
-              <View style={styles.instagramCarouselView}>
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r1.jpeg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r2.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r3.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r4.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r5.jpg")}
-                />
-                <Image
-                  style={styles.thumbnail}
-                  source={require("../../../assets/r6.jpg")}
-                />
-              </View> */}
+              
             </Swiper>
           </View>
           {/*here*/}

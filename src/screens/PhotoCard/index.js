@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { Image, ImageBackground, View } from "react-native";
+import {
+  Image,
+  ImageBackground,
+  View,
+  TouchableOpacity,
+  Platform
+} from "react-native";
 import {
   Container,
   Text,
@@ -21,6 +27,9 @@ import * as API from "../../services/Api";
 import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 import { Constants, Location, Permissions } from "expo";
+import Swiper from "react-native-swiper";
+var Dimensions = require("Dimensions");
+var { width, height } = Dimensions.get("window");
 
 class PhotoCard extends Component {
   constructor(props) {
@@ -30,6 +39,7 @@ class PhotoCard extends Component {
       opac: 0,
       users: [],
       loading: false,
+      expand: true
     };
   }
 
@@ -51,18 +61,19 @@ class PhotoCard extends Component {
       long: location.coords.longitude
     });
 
-    return location
+    return location;
   };
 
   async componentDidMount() {
-    this.setState({loading: true})
+    this.setState({ loading: true });
     const location = await this._getLocationAsync();
-    const { latitude, longitude } = location.coords
+    const { latitude, longitude } = location.coords;
 
     const { unlikes, user } = this.props;
-    const resUsers = await API.getUsersNearby_API({long: longitude, lat: latitude}, user.distance);
-
-
+    const resUsers = await API.getUsersNearby_API(
+      { long: longitude, lat: latitude },
+      user.distance
+    );
 
     let users = [];
     if (resUsers.status) {
@@ -79,6 +90,9 @@ class PhotoCard extends Component {
 
       // console.log('users ',users)
 
+      const { getPerson } = this.props;
+      await getPerson(users[0].uid);
+
       this.setState({ users, loading: false, longitude, latitude });
     }
   }
@@ -86,7 +100,10 @@ class PhotoCard extends Component {
   onRefresh = async () => {
     // const resUsers = await API.getUsers_API();
     const { unlikes, user } = this.props;
-    const resUsers = await API.getUsersNearby_API({long: this.state.longitude, lat: this.state.latitude}, user.distance);
+    const resUsers = await API.getUsersNearby_API(
+      { long: this.state.longitude, lat: this.state.latitude },
+      user.distance
+    );
 
     let users = [];
     if (resUsers.status) {
@@ -110,7 +127,7 @@ class PhotoCard extends Component {
           card1Top: true,
           card2Top: true,
           disabled: false,
-          selectedItem: users[0],
+          selectedItem: users[0]
           //selectedItem2: users[1]
         });
 
@@ -178,8 +195,38 @@ class PhotoCard extends Component {
     unlike(user.uid, selectedItem);
   };
 
+  changeStage = () => {
+    console.log("expand", this.state.expand);
+    this.setState({
+      expand: !this.state.expand
+    });
+
+    console.log("expand", this.state.expand);
+  };
+
+  renderNoUser = () => {
+    return (
+      <Container style={styles.wrapp}>
+        <View style={styles.bodyNoUser}>
+          <Image
+            style={styles.warningIcon}
+            source={require("../../../assets/warning.png")}
+            ResizeMode="contain"
+          />
+          <Text style={styles.textNoUser}>We ran into a problem loading people, sorry about that.</Text>
+          <Button block rounded style={styles.buttonTryAgain} onPress={this.onPrevious}>
+            <Text style={styles.buttonText}>TRY AGAIN</Text>
+          </Button>
+        </View>
+      </Container>
+    );
+  };
+
   render() {
+    //return this.renderNoUser();
+
     const { users } = this.state;
+    const { person } = this.props;
     //const data1 = users.filter(item => item.uid != null);
 
     const navigation = this.props.navigation;
@@ -187,180 +234,163 @@ class PhotoCard extends Component {
 
     // if (users.length < 2) return <Text>No user found.</Text>;
 
+    if (!person) return <Spinner />;
+
     return (
       <Container style={styles.wrapper}>
-        <View style={styles.deckswiperView}>
-          <DeckSwiper
-            looping={false}
-            activeOpacity={1}
-            dataSource={users}
-            ref={mr => (this._deckSwiper = mr)}
-            onSwiping={this.onSwiping}
-            onSwipeRight={this.onSwipeRight}
-            onSwipeLeft={this.onSwipeLeft}
-            renderItem={item => (
-              <Card activeOpacity={1} style={{ borderRadius: 10 }}>
-                <CardItem
-                  button
-                  style={styles.deckswiperImageCarditem}
-                  activeOpacity={1}
-                  cardBody
-                  onPress={() =>
-                    navigation.navigate("PhotoCardDetails", { person: item })
-                  }
-                >
-                  <ImageBackground
-                    style={styles.cardMain}
-                    source={
-                      item.uid == null
-                        ? item.image
-                        : item.image != ""
-                          ? { uri: item.image }
-                          : require("../../../assets/launchscreen.png")
-                    }
-                  >
-                    {this.state.direction === "left" && (
-                      <View
-                        style={{
-                          //opacity: -this.state.opac / 150,
-                          position: "absolute",
-                          right: 30,
-                          top: 40,
-                          borderWidth: 2,
-                          borderRadius: 5,
-                          borderColor: commonColor.brandPrimary,
-                          width: 100,
-                          height: 40,
-                          justifyContent: "center",
-                          alignItems: "center",
-                          transform: [{ rotate: "20deg" }]
-                        }}
-                      >
-                        <Text
-                          style={{
-                            backgroundColor: "transparent",
-                            fontSize: 30,
-                            color: commonColor.brandPrimary,
-                            fontWeight: "900",
-                            textAlign: "center",
-                            lineHeight: 35
-                          }}
-                        >
-                          NOPE
-                        </Text>
-                      </View>
-                    )}
-                    {this.state.direction === "right" && (
-                      <View
-                        style={{
-                          //opacity: this.state.opac / 150,
-                          position: "absolute",
-                          left: 30,
-                          top: 40,
-                          borderWidth: 2,
-                          borderRadius: 5,
-                          borderColor: commonColor.brandSuccess,
-                          width: 100,
-                          height: 40,
-                          justifyContent: "center",
-                          alignItems: "center",
-                          transform: [{ rotate: "-20deg" }]
-                        }}
-                      >
-                        <Text
-                          style={{
-                            backgroundColor: "transparent",
-                            fontSize: 30,
-                            color: commonColor.brandSuccess,
-                            fontWeight: "900",
-                            textAlign: "center",
-                            lineHeight: 35
-                          }}
-                        >
-                          Like
-                        </Text>
-                      </View>
-                    )}
-                  </ImageBackground>
-                </CardItem>
-                <CardItem
-                  button
-                  activeOpacity={1}
-                  onPress={() =>
-                    navigation.navigate("PhotoCardDetails", { person: item })
-                  }
-                  style={styles.deckswiperDetailsCarditem}
-                >
-                  <Body>
-                    <Text style={styles.text}>{item.name}</Text>
-                    <Text style={styles.subtextLeft}>{item.college}</Text>
-                  </Body>
-                  <Right>
-                    <Button transparent>
-                      <Icon name="md-book" style={styles.iconRight} />
-                      <Text style={styles.subtextRight}>{item.num}</Text>
-                    </Button>
-                  </Right>
-                </CardItem>
-              </Card>
-            )}
-            renderEmpty={() => (
-              <Text style={{ textAlign: "center" }}>No user found nearby!</Text>
-            )}
-          />
+        <View style={styles.instagramPhotosCarousel}>
+          <Swiper
+            width={width}
+            height={height}
+            dot={
+              <View
+                style={[
+                  styles.dot,
+                  { backgroundColor: "rgba(255,255,255,0.5)" }
+                ]}
+              />
+            }
+            activeDot={
+              <View
+                style={[
+                  styles.dot,
+                  { backgroundColor: commonColor.brandPrimary }
+                ]}
+              />
+            }
+            loop={false}
+          >
+            <View style={styles.slideView}>
+              <Image
+                style={styles.image}
+                source={
+                  person.image == ""
+                    ? require("../../../assets/launchscreen.png")
+                    : { uri: person.image }
+                }
+              />
+            </View>
+            {/* <View style={styles.slideView}>
+                <Image
+                  style={styles.image}
+                  source={require("../../../assets/r5.jpg")}
+                />
+              </View>
+              <View style={styles.slideView}>
+                <Image
+                  style={styles.image}
+                  source={require("../../../assets/r1.jpeg")}
+                />
+              </View> */}
+          </Swiper>
         </View>
-        <Grid style={styles.bottomGrid}>
-          <Row style={styles.bottomRowStyle}>
-            <Button
-              style={styles.bottomRoundedSmallPills}
-              onPress={this.onRefresh}
-            >
-              <Icon
-                name="md-refresh"
-                style={{
-                  color: commonColor.brandWarning,
-                  fontSize: 34
-                }}
-              />
-            </Button>
-            <Button style={styles.bottomRoundedPills} onPress={this.onUnLike}>
-              <Icon
-                name="md-close"
-                style={{
-                  color: commonColor.brandDanger,
-                  fontSize: 40,
-                  lineHeight: 40
-                }}
-              />
-            </Button>
-            <Button style={styles.bottomRoundedPills} onPress={this.onLike}>
-              <Icon
-                name="md-heart"
-                style={{
-                  color: commonColor.brandSuccess,
-                  fontSize: 35,
-                  lineHeight: 40,
-                  marginLeft: 2,
-                  marginRight: 2
-                }}
-              />
-            </Button>
-            <Button
-              style={styles.bottomRoundedSmallPills}
-              onPress={this.onSuperLike}
-            >
-              <Icon
-                name="md-star"
-                style={{
-                  color: commonColor.brandInfo,
-                  fontSize: 34,
-                  marginLeft: 3,
-                  marginRight: 3
-                }}
-              />
-            </Button>
-          </Row>
-        </Grid>
+
+        {this.state.expand ? (
+          <TouchableOpacity onPress={this.changeStage}>
+            <View style={styles.body}>
+              <Text style={styles.nameText}>Monica 22</Text>
+              <Text style={styles.address}>Manhattan, New York</Text>
+              <Text style={styles.church}>St. Mary & St. Mark Church</Text>
+              <Text style={{ marginTop: 10 }}>
+                This is a concept of a dating app specifically targeting the
+                Coptic Orthodox community. I’m not sure what else to type here,
+                trying to fill this up as much as I can.
+              </Text>
+
+              <View>
+                <Text style={styles.photo}>Photos</Text>
+              </View>
+              <View>
+                <Swiper
+                  width={width}
+                  height={
+                    Platform.OS === "ios"
+                      ? (width / 3 - 5) * 2
+                      : (width / 3 + 14) * 2
+                  }
+                  paginationStyle={styles.swiperPaginationStyle}
+                  dot={
+                    <View
+                      style={[
+                        styles.thumbnailDot,
+                        {
+                          backgroundColor: "rgba(0,0,0,0.3)"
+                        }
+                      ]}
+                    />
+                  }
+                  activeDot={
+                    <View
+                      style={[
+                        styles.thumbnailDot,
+                        { backgroundColor: commonColor.brandPrimary }
+                      ]}
+                    />
+                  }
+                  loop={false}
+                >
+                  <View style={styles.instagramCarouselView}>
+                    {Array.isArray(this.state.images) ? (
+                      this.state.images.map(image => {
+                        return (
+                          <Image
+                            style={styles.thumbnail}
+                            source={{ uri: image.uri }}
+                            resizeMode="contain"
+                          />
+                        );
+                      })
+                    ) : (
+                      <React.Fragment />
+                    )}
+                  </View>
+                </Swiper>
+              </View>
+
+              <View style={styles.buttons}>
+                <TouchableOpacity>
+                  <Image
+                    source={require("../../../assets/Pass_Button.png")}
+                    style={styles.close}
+                  />
+                </TouchableOpacity>
+                <Button
+                  block
+                  rounded
+                  style={styles.button}
+                  onPress={this.onPrevious}
+                >
+                  <Text style={styles.buttonText}>LIKE</Text>
+                </Button>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={this.changeStage}>
+            <View style={[styles.body, { height: 220 }]}>
+              <Text style={styles.nameText}>Monica 22</Text>
+              <Text style={styles.address}>Manhattan, New York</Text>
+              <Text style={styles.church}>St. Mary & St. Mark Church</Text>
+
+              <View style={styles.buttons}>
+                <TouchableOpacity>
+                  <Image
+                    source={require("../../../assets/Pass_Button.png")}
+                    style={styles.close}
+                  />
+                </TouchableOpacity>
+                <Button
+                  block
+                  rounded
+                  style={styles.button}
+                  onPress={this.onPrevious}
+                >
+                  <Text style={styles.buttonText}>LIKE</Text>
+                </Button>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
       </Container>
     );
   }
@@ -369,12 +399,14 @@ class PhotoCard extends Component {
 export default connect(
   state => ({
     user: state.global.user,
-    unlikes: state.global.unlikes
+    unlikes: state.global.unlikes,
+    person: state.global.person
   }),
   {
     like: Actions.like,
     unlike: Actions.unlike,
     checkMatch: Actions.checkMatch,
-    updateUser: Actions.updateUser
+    updateUser: Actions.updateUser,
+    getPerson: Actions.getPerson
   }
 )(PhotoCard);

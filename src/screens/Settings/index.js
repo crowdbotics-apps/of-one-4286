@@ -1,445 +1,336 @@
 import React, { Component } from "react";
-import { Image, View, Text, Slider, Platform, Linking } from "react-native";
-import { NavigationActions, StackActions } from "react-navigation";
+import {
+  Image,
+  ImageBackground,
+  View,
+  TouchableOpacity,
+  Platform
+} from "react-native";
 import {
   Container,
-  Content,
-  Icon,
-  Switch,
-  Button,
-  Header,
-  Title,
+  Text,
   Card,
   CardItem,
-  Left,
+  DeckSwiper,
+  Grid,
+  Row,
+  Icon,
+  Button,
+  Right,
   Body,
-  Right
+  Spinner
 } from "native-base";
-import styles from "./styles";
 import commonColor from "../../theme/variables/commonColor";
+import styles from "./styles";
+
 import * as API from "../../services/Api";
 import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
-import { success, info, alert } from "../../services/Alert";
-import * as ActionType from "../../redux/actionType";
-
-const resetAction = StackActions.reset({
-  index: 0,
-  actions: [NavigationActions.navigate({ routeName: "Login" })]
-});
+import { Constants, Location, Permissions } from "expo";
+import Swiper from "react-native-swiper";
+import { ScrollView } from "react-native-gesture-handler";
+var Dimensions = require("Dimensions");
+var { width, height } = Dimensions.get("window");
 
 class Settings extends Component {
-  state = {
-    // trueSwitchIsOn: true,
-    // trueSwitchIsOn2: true,
-    // trueSwitchIsOn3: true,
-    // falseSwitchIsOn: false,
-    // notSwitch1: true,
-    // notSwitch2: true,
-    // notSwitch3: true,
-    // notSwitch4: true,
+  constructor(props) {
+    super(props);
+    this.state = {
+      direction: null,
+      opac: 0,
+      users: [],
+      loading: false,
+      expand: true
+    };
+  }
 
-    // leftValue: 25,
-    // rightValue: 35,
-    // disKM: true,
+  _getLocationAsync = async () => {
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== "granted") {
+      this.setState({
+        locationResult: "Permission to access location was denied"
+      });
+    } else {
+      this.setState({ hasLocationPermissions: true });
+    }
 
-    sliderValue: 0,
-    showMeMen: true,
-    showMeWomen: true,
-    showMeOnApp: true
+    let location = await Location.getCurrentPositionAsync({});
+    // console.log('location',   //longitude)
+
+    this.props.updateUser(this.props.user.uid, {
+      lat: location.coords.latitude,
+      long: location.coords.longitude
+    });
+
+    return location;
   };
 
-  changeDisType(val) {
-    if (val === 1) {
-      this.setState({ disKM: true });
-    } else {
-      this.setState({ disKM: false });
+  async componentDidMount() {
+    this.setState({ loading: true });
+    const location = await this._getLocationAsync();
+    const { latitude, longitude } = location.coords;
+
+    const { unlikes, user } = this.props;
+    const resUsers = await API.getUsersNearby_API(
+      { long: longitude, lat: latitude },
+      user.distance
+    );
+
+    let users = [];
+    if (resUsers.status) {
+      users = resUsers.data;
+
+      users = users.filter(
+        item => unlikes.filter(unlike => unlike.uid == item.uid).length == 0
+      );
+
+      if (!user.showMeWomen)
+        users = users.filter(item => item.gender != "female");
+
+      if (!user.showMeMen) users = users.filter(item => item.gender != "male");
+
+      // console.log('users ',users)
+
+      const { getPerson } = this.props;
+      await getPerson(users[0].uid);
+
+      this.setState({ users, loading: false, longitude, latitude });
     }
   }
 
-  onSave = async () => {
-    const { sliderValue, showMeMen, showMeWomen, showMeOnApp } = this.state;
-    const { updateUser, user } = this.props;
+  onRefresh = async () => {
+    // const resUsers = await API.getUsers_API();
+    const { unlikes, user } = this.props;
+    const resUsers = await API.getUsersNearby_API(
+      { long: this.state.longitude, lat: this.state.latitude },
+      user.distance
+    );
 
-    const updObj = {
-      distance: sliderValue,
-      showMeMen,
-      showMeWomen,
-      showMeOnApp
-    };
+    let users = [];
+    if (resUsers.status) {
+      users = resUsers.data;
 
-    res = await updateUser(user.uid, updObj);
+      users = users.filter(
+        item =>
+          this.props.unlikes.filter(unlike => unlike.uid == item.uid).length ==
+          0
+      );
 
-    //success('Settings has been saved')
+      if (!user.showMeWomen)
+        users = users.filter(item => item.gender != "female");
 
-    if (res.type == ActionType.UPDATE_USER_OK)
-      success("Settings has been saved");
-    else alert("There is an unexpected error, please try again!");
+      if (!user.showMeMen) users = users.filter(item => item.gender != "male");
+
+      console.log("users", users, this.props.unlikes);
+      if (Array.isArray(users) && users.length > 0) {
+        this._deckSwiper._root.setState({
+          lastCard: false,
+          card1Top: true,
+          card2Top: true,
+          disabled: false,
+          selectedItem: users[0]
+          //selectedItem2: users[1]
+        });
+
+        this.setState({ users });
+      }
+    }
   };
 
-  componentDidMount() {
-    const { user } = this.props;
+  onLike = async person => {
+    const { user, like, checkMatch } = this.props;
+    const { selectedItem } = this._deckSwiper._root.state;
+
+    await like(user.uid, selectedItem, false);
+    checkMatch(user.uid, selectedItem);
+    this._deckSwiper._root.swipeRight();
+  };
+
+  onUnLike = async person => {
+    const { user, unlike } = this.props;
+    const { selectedItem } = this._deckSwiper._root.state;
+
+    unlike(user.uid, selectedItem);
+    this._deckSwiper._root.swipeLeft();
+  };
+
+  onSuperLike = async () => {
+    const { user, like, checkMatch } = this.props;
+    const { selectedItem } = this._deckSwiper._root.state;
+
+    await like(user.uid, selectedItem, true);
+    checkMatch(user.uid, selectedItem);
+    this._deckSwiper._root.swipeRight();
+
+    // const navigation = this.props.navigation;
+    // navigation.navigate("PhotoCardDetails")
+  };
+
+  onSwiping = async (dir, opa) => {
+    // const { user, unlike, like } = this.props;
+    // const { selectedItem2 } = this._deckSwiper._root.state;
+
+    // console.log('user', user)
+
+    this.setState({ direction: dir, opac: opa });
+
+    // if (dir == "left") {
+    //   unlike(user.uid, selectedItem2);
+    // } else {
+    //   like(user.uid, selectedItem2, false);
+    // }
+  };
+
+  onSwipeRight = async () => {
+    const { user, like, checkMatch } = this.props;
+    const { selectedItem } = this._deckSwiper._root.state;
+
+    await like(user.uid, selectedItem, false);
+    checkMatch(user.uid, selectedItem);
+  };
+
+  onSwipeLeft = async () => {
+    const { user, unlike } = this.props;
+    const { selectedItem } = this._deckSwiper._root.state;
+
+    unlike(user.uid, selectedItem);
+  };
+
+  changeStage = () => {
+    console.log("expand", this.state.expand);
     this.setState({
-      sliderValue: user.distance,
-      showMeMen: user.showMeMen,
-      showMeWomen: user.showMeWomen,
-      showMeOnApp: user.showMeOnApp
+      expand: !this.state.expand
     });
-  }
+
+    console.log("expand", this.state.expand);
+  };
+
+  renderNoUser = () => {
+    return (
+      <Container style={styles.wrapp}>
+        <View style={styles.bodyNoUser}>
+          <Image
+            style={styles.warningIcon}
+            source={require("../../../assets/warning.png")}
+            ResizeMode="contain"
+          />
+          <Text style={styles.textNoUser}>
+            We ran into a problem loading people, sorry about that.
+          </Text>
+          <Button
+            block
+            rounded
+            style={styles.buttonTryAgain}
+            onPress={this.onPrevious}
+          >
+            <Text style={styles.buttonText}>TRY AGAIN</Text>
+          </Button>
+        </View>
+      </Container>
+    );
+  };
 
   render() {
+    //return this.renderNoUser();
+
+    const { users } = this.state;
+    const { person } = this.props;
+    //const data1 = users.filter(item => item.uid != null);
+
     const navigation = this.props.navigation;
+    if (this.state.loading) return <Spinner />;
+
+    // if (users.length < 2) return <Text>No user found.</Text>;
+
+    if (!person) return <Spinner />;
 
     return (
-      <Container>
-        <Header>
-          <Left>
-            <Button transparent onPress={() => navigation.goBack()}>
-              <Icon name="md-arrow-back" />
-            </Button>
-          </Left>
-          <Body>
-            <Title>Settings</Title>
-          </Body>
-          <Right>
-            <Button transparent onPress={this.onSave}>
-              <Icon name="md-save" />
-            </Button>
-          </Right>
-        </Header>
-        <Content style={styles.container}>
-          <View style={{ paddingTop: 15, paddingHorizontal: 10 }}>
-            {/* <View style={{ marginBottom: 10 }}>
-              <Text style={styles.text}>Discovery Settings</Text>
-            </View>
-            <Card>
-              <CardItem style={styles.locationSwipperCarditem}>
-                <Text style={styles.cardItemText}>Swiping in </Text>
-                <Text style={styles.textBlue}> My Current Location</Text>
-              </CardItem>
-            </Card>
-            <View>
-              <Text style={styles.someText}>
-                Change your swipe location to see Tinder members in other cities
-              </Text>
-            </View> */}
-            <Card style={styles.card}>
-              <CardItem style={styles.cardItemHeaderView}>
-                <Text style={styles.redText}>Show Me</Text>
-              </CardItem>
-              <CardItem>
-                <Left>
-                  <Text style={styles.cardItemText}>Men</Text>
-                </Left>
-                <Right>
-                  <Switch
-                    onValueChange={value => this.setState({ showMeMen: value })}
-                    onTintColor={commonColor.brandPrimary}
-                    thumbTintColor={
-                      Platform.OS === "android" ? "#ededed" : undefined
-                    }
-                    value={this.state.showMeMen}
-                  />
-                </Right>
-              </CardItem>
-              <CardItem>
-                <Left>
-                  <Text style={styles.cardItemText}>Women</Text>
-                </Left>
-                <Right>
-                  <Switch
-                    onValueChange={value =>
-                      this.setState({ showMeWomen: value })
-                    }
-                    onTintColor={commonColor.brandPrimary}
-                    thumbTintColor={
-                      Platform.OS === "android" ? "#ededed" : undefined
-                    }
-                    value={this.state.showMeWomen}
-                  />
-                </Right>
-              </CardItem>
-            </Card>
-            <Card style={styles.card}>
-              <CardItem style={styles.cardItemHeaderView}>
-                <Left>
-                  <Text style={styles.redText}>Search Distance</Text>
-                </Left>
-                <Right>
-                  <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                    {this.state.sliderValue} mi.
-                  </Text>
-                </Right>
-              </CardItem>
-              <View style={{ flex: 1, justifyContent: "center" }}>
-                <Slider
-                  style={{ margin: 10 }}
-                  onValueChange={value => this.setState({ sliderValue: value })}
-                  maximumValue={50}
-                  minimumValue={1}
-                  minimumTrackTintColor={commonColor.brandPrimary}
-                  step={1}
-                  value={this.state.sliderValue}
-                />
-              </View>
-            </Card>
-            <CardItem style={styles.switchBlock}>
-              <Left>
-                <Text style={styles.swipText}>Show me on OfOne App</Text>
-              </Left>
-              <Right>
-                <Switch
-                  onValueChange={value => this.setState({ showMeOnApp: value })}
-                  onTintColor={commonColor.brandPrimary}
-                  thumbTintColor={
-                    Platform.OS === "android" ? "#ededed" : undefined
-                  }
-                  value={this.state.showMeOnApp}
-                />
-              </Right>
-            </CardItem>
-            <View>
-              <Text style={styles.someText}>
-                OfOne app uses these preferences to suggest matches.Some match
-                suggestions may not fall within your desired parameters.
-              </Text>
-            </View>
+      <ImageBackground
+        //source={require("../../../assets/background.png")}
+        source={
+          person.image == ""
+            ? require("../../../assets/launchscreen.png")
+            : { uri: person.image }
+        }
+        style={{ width: "100%", height: "100%" }}
+      >
+        <Container style={styles.wrapper}>
+          <View style={styles.body}>
+            <ScrollView style={{ flex: 1 }}>
+              <Text style={styles.nameText}>Monica 22</Text>
+              <Text style={styles.address}>Manhattan, New York</Text>
+              <Text style={styles.church}>St. Mary & St. Mark Church</Text>
+              
+              
+              <TouchableOpacity style={styles.group}>
+                <Text style={styles.label}>Church</Text>
+                <Text style={styles.text}>Change</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.group}>
+                <Text style={styles.label}>Visibility</Text>
+                <Text style={styles.text}>Visible</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.group}>
+                <Text style={styles.label}>Help Support</Text>
+                <Text style={styles.text}>Connected</Text>
+              </TouchableOpacity>
 
-            {/* <Card style={styles.card}>
-              <CardItem style={styles.cardItemHeaderView}>
-                <Left>
-                  <Text style={styles.redText}>Web Profile</Text>
-                </Left>
-              </CardItem>
-              <CardItem>
-                <Left>
-                  <Text style={{ color: commonColor.contentTextColor }}>
-                    Username
-                  </Text>
-                </Left>
-                <Right>
-                  <Text style={{ color: commonColor.contentTextColor }}>
-                    Claim Yours
-                  </Text>
-                </Right>
-              </CardItem>
-              <CardItem style={styles.cardItemHeaderView}>
-                <Text
-                  style={{
-                    color: commonColor.lightTextColor,
-                    fontSize: 12
-                  }}
-                >
-                  Create a username. Share your username. Have people all over
-                  the world swipe you right on DatingApp
-                </Text>
-              </CardItem>
-            </Card> */}
-            {/* <View style={{ marginVertical: 10 }}>
-              <Text style={styles.text}>App Settings</Text>
-            </View> */}
-            {/* <View>
-              <Card style={{ borderRadius: 5 }}>
-                <CardItem style={{ borderRadius: 5 }}>
-                  <Text style={styles.redText}>Notifications</Text>
-                </CardItem>
-                <CardItem>
-                  <Left>
-                    <Text style={styles.cardItemText}>New Matches</Text>
-                  </Left>
-                  <Right>
-                    <Switch
-                      onValueChange={value =>
-                        this.setState({ notSwitch1: value })}
-                      onTintColor={commonColor.brandPrimary}
-                      thumbTintColor={
-                        Platform.OS === "android" ? "#ededed" : undefined
-                      }
-                      value={this.state.notSwitch1}
-                    />
-                  </Right>
-                </CardItem>
-                <CardItem>
-                  <Left>
-                    <Text style={styles.cardItemText}>Messages</Text>
-                  </Left>
-                  <Right>
-                    <Switch
-                      onValueChange={value =>
-                        this.setState({ notSwitch2: value })}
-                      onTintColor={commonColor.brandPrimary}
-                      thumbTintColor={
-                        Platform.OS === "android" ? "#ededed" : undefined
-                      }
-                      value={this.state.notSwitch2}
-                    />
-                  </Right>
-                </CardItem>
-                <CardItem>
-                  <Left>
-                    <Text style={styles.cardItemText}>Message Likes</Text>
-                  </Left>
-                  <Right>
-                    <Switch
-                      onValueChange={value =>
-                        this.setState({ notSwitch3: value })}
-                      onTintColor={commonColor.brandPrimary}
-                      thumbTintColor={
-                        Platform.OS === "android" ? "#ededed" : undefined
-                      }
-                      value={this.state.notSwitch3}
-                    />
-                  </Right>
-                </CardItem>
-                <CardItem>
-                  <Left>
-                    <Text style={styles.cardItemText}>Super Likes</Text>
-                  </Left>
-                  <Right>
-                    <Switch
-                      onValueChange={value =>
-                        this.setState({ notSwitch4: value })}
-                      onTintColor={commonColor.brandPrimary}
-                      thumbTintColor={
-                        Platform.OS === "android" ? "#ededed" : undefined
-                      }
-                      value={this.state.notSwitch4}
-                    />
-                  </Right>
-                </CardItem>
-              </Card>
-            </View> */}
-
-            {/* <View style={{ marginVertical: 10 }}>
-              <Card style={styles.card}>
-                <CardItem style={styles.cardItemHeaderView}>
-                  <Left>
-                    <Text style={styles.redText}>Show Distance in</Text>
-                  </Left>
-                  <Right>
-                    <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                      {this.state.disKM ? "Km." : "Mi."}
-                    </Text>
-                  </Right>
-                </CardItem>
-                <CardItem>
-                  <Button
-                    block
-                    transparent
-                    style={{
-                      flex: 2,
-                      backgroundColor: this.state.disKM
-                        ? commonColor.brandPrimary
-                        : "transparent"
-                    }}
-                    onPress={() => this.changeDisType(1)}
-                  >
-                    <Text
-                      style={{
-                        color: this.state.disKM
-                          ? "#FFF"
-                          : commonColor.contentTextColor,
-                        fontSize: 16,
-                        fontWeight: "700"
-                      }}
-                    >
-                      Km.
-                    </Text>
-                  </Button>
-                  <Button
-                    block
-                    transparent
-                    style={{
-                      flex: 2,
-                      backgroundColor: !this.state.disKM
-                        ? commonColor.brandPrimary
-                        : "transparent"
-                    }}
-                    onPress={() => this.changeDisType(2)}
-                  >
-                    <Text
-                      style={{
-                        color: !this.state.disKM
-                          ? "#FFF"
-                          : commonColor.contentTextColor,
-                        fontSize: 16,
-                        fontWeight: "700"
-                      }}
-                    >
-                      Mi.
-                    </Text>
-                  </Button>
-                </CardItem>
-              </Card>
-            </View> */}
-
-            <View style={{ marginVertical: 10 }}>
-              <Text style={styles.text}>Contact Us</Text>
-            </View>
-            <Button
-              block
-              style={styles.helpBtn}
-              onPress={() => {
-                Linking.openURL("mailto://support@ofone.org");
-              }}
-            >
-              <Text style={styles.helpBtnText}>Help & Support</Text>
-            </Button>
-
-            <View style={{ marginVertical: 10 }}>
-              <Card style={{ borderRadius: 5 }}>
-                <View style={{ paddingLeft: 3, marginVertical: 10 }}>
-                  <Button
-                    transparent
-                    small
-                    onPress={() => {
-                      Linking.openURL(
-                        "https://app.termly.io/document/privacy-policy/67185285-f602-4e03-8812-192c45653a06"
-                      );
-                    }}
-                  >
-                    <Text style={styles.cardItemText}>Privacy Policy</Text>
-                  </Button>
-                  <Button
-                    transparent
-                    small
-                    onPress={() => {
-                      Linking.openURL(
-                        "https://app.termly.io/document/terms-of-use-for-website/f6f7062f-2bf7-4cf2-ab99-0e7c72e5dfe4"
-                      );
-                    }}
-                  >
-                    <Text style={styles.cardItemText}>Terms of Service</Text>
-                  </Button>
-                </View>
-              </Card>
-            </View>
-
-            <Button
-              block
-              style={styles.helpBtn}
-              onPress={() => navigation.dispatch(resetAction)}
-            >
-              <Text style={styles.helpBtnText}>Logout</Text>
-            </Button>
-            <View style={{ alignItems: "center", marginVertical: 20 }}>
               <Image
-                source={require("../../../assets/logo.png")}
-                style={{ width: 40, height: 40 }}
+                style={{marginBottom: 15}}
+                source={
+                  require("../../../assets/line_setting.png")
+                   
+                }
               />
-            </View>
+              
+              <TouchableOpacity style={styles.group}>
+                <Text style={styles.label}>Help Support</Text>
+                <Text style={styles.text}>Email</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.group}>
+                <Text style={styles.label}>Privacy Policy & Guidelines</Text>
+                <Text style={styles.text}>Learn more</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.group}>
+                <Text style={styles.label}>Terms of Service</Text>
+                <Text style={styles.text}>Learn more</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.group}>
+                <Text style={styles.label}>Delete Account</Text>
+                <Text style={styles.textDel}>Permanently</Text>
+              </TouchableOpacity>
+              
+
+              <View style={styles.buttons}>
+               
+                <Button
+                  block
+                  rounded
+                  style={styles.button}
+                  onPress={() => navigation.navigate("EditProfile")}
+                >
+                  <Text style={styles.buttonText}>DONE</Text>
+                </Button>
+              </View>
+            </ScrollView>
           </View>
-        </Content>
-      </Container>
+        </Container>
+      </ImageBackground>
     );
   }
 }
 
 export default connect(
   state => ({
-    user: state.global.user
+    user: state.global.user,
+    unlikes: state.global.unlikes,
+    person: state.global.person
   }),
   {
-    updateUser: Actions.updateUser
+    like: Actions.like,
+    unlike: Actions.unlike,
+    checkMatch: Actions.checkMatch,
+    updateUser: Actions.updateUser,
+    getPerson: Actions.getPerson
   }
 )(Settings);

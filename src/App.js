@@ -38,7 +38,7 @@ const App = createStackNavigator(
   },
   {
     index: 0,
-    initialRouteName: "Loading",
+    initialRouteName: "Loading",//Loading
     headerMode: "none"
   }
 );

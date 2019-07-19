@@ -26,9 +26,10 @@ const HomeTabNavigation = createBottomTabNavigator(
                 small
                 source={
                   props.navigation.state.index === 0
-                    ? require("../../../assets/logo.png")
+                    ? require("../../../assets/profile.png")
                     : require("../../../assets/profile1.png")
                 }
+                resizeMode='contain'
               />
             </Button>
 
@@ -51,6 +52,7 @@ const HomeTabNavigation = createBottomTabNavigator(
                     ? require("../../../assets/logo.png")
                     : require("../../../assets/chat1.png")
                 }
+                resizeMode='contain'
               />
             </Button>
           </FooterTab>
