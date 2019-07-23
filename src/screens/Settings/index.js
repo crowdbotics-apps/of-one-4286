@@ -4,7 +4,9 @@ import {
   ImageBackground,
   View,
   TouchableOpacity,
-  Platform
+  Platform,
+  Linking,
+  Slider
 } from "react-native";
 import {
   Container,
@@ -22,6 +24,7 @@ import {
 } from "native-base";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
+import MultiSlider from "react-native-multi-slider";
 
 import * as API from "../../services/Api";
 import { connect } from "react-redux";
@@ -40,7 +43,8 @@ class Settings extends Component {
       opac: 0,
       users: [],
       loading: false,
-      expand: true
+      expand: true,
+      multiSliderValue: [21, 50]
     };
   }
 
@@ -196,6 +200,12 @@ class Settings extends Component {
     unlike(user.uid, selectedItem);
   };
 
+  multiSliderValuesChange = values => {
+    this.setState({
+      multiSliderValue: values
+    });
+  };
+
   changeStage = () => {
     console.log("expand", this.state.expand);
     this.setState({
@@ -234,7 +244,7 @@ class Settings extends Component {
     //return this.renderNoUser();
 
     const { users } = this.state;
-    const { person } = this.props;
+    const { person, user } = this.props;
     //const data1 = users.filter(item => item.uid != null);
 
     const navigation = this.props.navigation;
@@ -248,20 +258,61 @@ class Settings extends Component {
       <ImageBackground
         //source={require("../../../assets/background.png")}
         source={
-          person.image == ""
+          user.image == ""
             ? require("../../../assets/launchscreen.png")
-            : { uri: person.image }
+            : { uri: user.image }
         }
         style={{ width: "100%", height: "100%" }}
       >
         <Container style={styles.wrapper}>
           <View style={styles.body}>
             <ScrollView style={{ flex: 1 }}>
-              <Text style={styles.nameText}>Monica 22</Text>
+              <Text style={styles.nameText}>{user.name} 22</Text>
               <Text style={styles.address}>Manhattan, New York</Text>
               <Text style={styles.church}>St. Mary & St. Mark Church</Text>
-              
-              
+
+              <Text style={styles.headerText}>Settings</Text>
+
+              <View style={styles.group}>
+                <Text style={styles.label}>Radius</Text>
+                <View style={{ flex: 1, justifyContent: "center" }}>
+                  <Slider
+                    //style={{ marginBottom: 10 }}
+                    onValueChange={value =>
+                      this.setState({ sliderValue: value })
+                    }
+                    maximumValue={50}
+                    minimumValue={1}
+                    minimumTrackTintColor={"#d9a91a"}
+                    step={1}
+                    value={this.state.sliderValue}
+                    
+                  />
+                </View>
+              </View>
+
+              <View >
+                <Text style={[styles.label, { marginBottom: 15 }]}>Age Range</Text>
+
+                <MultiSlider
+                  values={[
+                    this.state.multiSliderValue[0],
+                    this.state.multiSliderValue[1]
+                  ]}
+                  sliderLength={width - 40}
+                  onValuesChangeFinish={this.multiSliderValuesChange}
+                  min={0}
+                  max={100}
+                  step={1}
+                  allowOverlap
+                  snapped
+                  selectedStyle={{ backgroundColor: "#d9a91a" }}
+                  trackStyle={{height: 2, marginTop: 4 }}
+                  unselectedStyle={{ backgroundColor: "#bdbfbf" }}
+                  markerContainerStyle={{ color: "white" }}
+                />
+              </View>
+
               <TouchableOpacity style={styles.group}>
                 <Text style={styles.label}>Church</Text>
                 <Text style={styles.text}>Change</Text>
@@ -276,22 +327,38 @@ class Settings extends Component {
               </TouchableOpacity>
 
               <Image
-                style={{marginBottom: 15}}
-                source={
-                  require("../../../assets/line_setting.png")
-                   
-                }
+                style={{ marginBottom: 15 }}
+                source={require("../../../assets/line_setting.png")}
               />
-              
-              <TouchableOpacity style={styles.group}>
+
+              <TouchableOpacity
+                style={styles.group}
+                onPress={() => {
+                  Linking.openURL("mailto://support@ofone.org");
+                }}
+              >
                 <Text style={styles.label}>Help Support</Text>
                 <Text style={styles.text}>Email</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.group}>
+              <TouchableOpacity
+                style={styles.group}
+                onPress={() => {
+                  Linking.openURL(
+                    "https://app.termly.io/document/privacy-policy/67185285-f602-4e03-8812-192c45653a06"
+                  );
+                }}
+              >
                 <Text style={styles.label}>Privacy Policy & Guidelines</Text>
                 <Text style={styles.text}>Learn more</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.group}>
+              <TouchableOpacity
+                style={styles.group}
+                onPress={() => {
+                  Linking.openURL(
+                    "https://app.termly.io/document/terms-of-use-for-website/f6f7062f-2bf7-4cf2-ab99-0e7c72e5dfe4"
+                  );
+                }}
+              >
                 <Text style={styles.label}>Terms of Service</Text>
                 <Text style={styles.text}>Learn more</Text>
               </TouchableOpacity>
@@ -299,10 +366,8 @@ class Settings extends Component {
                 <Text style={styles.label}>Delete Account</Text>
                 <Text style={styles.textDel}>Permanently</Text>
               </TouchableOpacity>
-              
 
               <View style={styles.buttons}>
-               
                 <Button
                   block
                   rounded

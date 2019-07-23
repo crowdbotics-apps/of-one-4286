@@ -226,7 +226,7 @@ class Profile extends Component {
     //return this.renderNoUser();
 
     const { users } = this.state;
-    const { person } = this.props;
+    const { person, user } = this.props;
     //const data1 = users.filter(item => item.uid != null);
 
     const navigation = this.props.navigation;
@@ -264,9 +264,9 @@ class Profile extends Component {
               <Image
                 style={styles.image}
                 source={
-                  person.image == ""
+                  user.image == ""
                     ? require("../../../assets/launchscreen.png")
-                    : { uri: person.image }
+                    : { uri: user.image }
                 }
               />
             </View>
@@ -288,10 +288,10 @@ class Profile extends Component {
         {this.state.expand ? (
           <TouchableOpacity onPress={this.changeStage}>
             <View style={styles.body}>
-              <Text style={styles.nameText}>Monica 22</Text>
+              <Text style={styles.nameText}>{user.name} 23</Text>
               <Text style={styles.address}>Manhattan, New York</Text>
               <Text style={styles.church}>St. Mary & St. Mark Church</Text>
-              <Text style={{ marginTop: 10 }}>
+              <Text style={styles.desc}>
                 This is a concept of a dating app specifically targeting the
                 Coptic Orthodox community. I’m not sure what else to type here,
                 trying to fill this up as much as I can.
@@ -368,7 +368,7 @@ class Profile extends Component {
         ) : (
           <TouchableOpacity onPress={this.changeStage}>
             <View style={[styles.body, { height: 220 }]}>
-              <Text style={styles.nameText}>Andrew 22</Text>
+              <Text style={styles.nameText}>{user.name} 23</Text>
               <Text style={styles.address}>Manhattan, New York</Text>
               <Text style={styles.church}>St. Mary & St. Mark Church</Text>
 

@@ -55,6 +55,23 @@ export default {
     borderStyle: 'solid',
     borderWidth: 2,
     alignSelf: 'center',
-  }
+  },
+  buttonPrev:{
+    width: 146,
+    height: 36,
+    borderRadius: 24,
+    borderColor: "#bdbfbf",
+    borderStyle: "solid",
+    borderWidth: 2,
+    backgroundColor: "#f2f2f2",
+    //marginLeft: deviceWidth - 175,
+    marginTop: 50,
+  },
+  buttonTextPrev: {
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 12,
+    fontWeight: "400"
+  },
 
 };

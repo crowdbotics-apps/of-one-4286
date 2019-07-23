@@ -54,7 +54,7 @@ class VerifyBirthday extends Component {
               style={{ marginTop: -2 }}
             />
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => this.props.navigation.navigate('Login')}>
             <Image
               source={require("../../../assets/close.png")}
               style={styles.close}

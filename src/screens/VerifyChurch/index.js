@@ -74,7 +74,7 @@ class VerifyChurch extends Component {
               style={{ marginTop: -2 }}
             />
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => this.props.navigation.navigate('Login')}>
             <Image
               source={require("../../../assets/close.png")}
               style={styles.close}
@@ -105,10 +105,10 @@ class VerifyChurch extends Component {
             <Button
               block
               rounded
-              style={styles.button}
+              style={styles.buttonPrev}
               onPress={this.onPrevious}
             >
-              <Text style={styles.buttonText}>PREVIOUS</Text>
+              <Text style={styles.buttonTextPrev}>PREVIOUS</Text>
             </Button>
 
             <Button

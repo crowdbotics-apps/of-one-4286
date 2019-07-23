@@ -182,6 +182,14 @@ export default {
     fontSize: 12,
     fontWeight: "400"
   },
+  desc: {
+    marginTop: 10,
+    height: 45,
+    color: "#404040",
+    fontFamily: "Lato",
+    fontSize: 12,
+    fontStyle: "italic"
+  },
   workingText: {
     color: "rgba(0,0,0,0.75)"
   },
@@ -365,16 +373,16 @@ export default {
     fontWeight: "400",
     letterSpacing: 0.06,
     marginTop: 32,
-    marginBottom: 15,
+    marginBottom: 15
   },
   buttonTryAgain: {
     height: 36,
     borderRadius: 24,
-    borderColor: '#d9a91a',
-    borderStyle: 'solid',
+    borderColor: "#d9a91a",
+    borderStyle: "solid",
     borderWidth: 2,
     width: 146,
     backgroundColor: "#f2f2f2",
-    alignSelf: 'center'
-  },
+    alignSelf: "center"
+  }
 };

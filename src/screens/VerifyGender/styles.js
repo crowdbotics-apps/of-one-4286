@@ -36,12 +36,31 @@ export default {
     //marginLeft: deviceWidth - 175,
     marginTop: 50,
   },
+  buttonPrev:{
+    width: 146,
+    height: 36,
+    borderRadius: 24,
+    borderColor: "#bdbfbf",
+    borderStyle: "solid",
+    borderWidth: 2,
+    backgroundColor: "#f2f2f2",
+    //marginLeft: deviceWidth - 175,
+    marginTop: 50,
+  },
+  buttonTextPrev: {
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 12,
+    fontWeight: "400"
+  },
+  
   buttonText: {
     color: "#d9a91a",
     fontFamily: "Lato",
     fontSize: 12,
     fontWeight: "400"
   },
+  
   close: {
     marginTop: 30,
     marginLeft: 30,

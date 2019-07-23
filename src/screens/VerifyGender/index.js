@@ -7,7 +7,16 @@ import {
   ImageBackground,
   TouchableOpacity
 } from "react-native";
-import { Container, Content, Button, View, CheckBox, Icon, Text, Body } from "native-base";
+import {
+  Container,
+  Content,
+  Button,
+  View,
+  CheckBox,
+  Icon,
+  Text,
+  Body
+} from "native-base";
 import Swiper from "react-native-swiper";
 import styles from "./styles";
 import commonColor from "../../theme/variables/commonColor";
@@ -45,18 +54,17 @@ class VerifyGender extends Component {
   };
 
   onContinue = () => {
-    this.props.navigation.navigate('VerifyChurch')
-  }
+    this.props.navigation.navigate("VerifyChurch");
+  };
 
   onPrevious = () => {
-    this.props.navigation.goBack()
-  }
+    this.props.navigation.goBack();
+  };
 
   render() {
     return (
       <Container style={{ backgroundColor: "#f2f2f2" }}>
         <Content scrollEnabled={false} contentContainerStyle={{ flex: 1 }}>
-
           <View style={styles.headerWrap}>
             <Text style={styles.header}>Verify your gender</Text>
             <Image
@@ -64,8 +72,10 @@ class VerifyGender extends Component {
               style={{ marginTop: -2 }}
             />
           </View>
-         
-          <TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => this.props.navigation.navigate("Login")}
+          >
             <Image
               source={require("../../../assets/close.png")}
               style={styles.close}
@@ -74,14 +84,21 @@ class VerifyGender extends Component {
 
           <Gender gender={this.state.gender} onChange={this.onChangeGender} />
 
-          <View style={{ flexDirection: "row", justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 30 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginHorizontal: 30
+            }}
+          >
             <Button
               block
               rounded
-              style={styles.button}
+              style={styles.buttonPrev}
               onPress={this.onPrevious}
             >
-              <Text style={styles.buttonText}>PREVIOUS</Text>
+              <Text style={styles.buttonTextPrev}>PREVIOUS</Text>
             </Button>
 
             <Button
@@ -110,13 +127,17 @@ const Gender = props => {
   return (
     <View
       style={[
-        { flexDirection: "row", justifyContent: "space-around", marginHorizontal: 30 },
+        {
+          flexDirection: "row",
+          justifyContent: "space-around",
+          marginHorizontal: 30
+        },
         { ...style }
       ]}
     >
       <View style={{ flexDirection: "row" }}>
         <CheckBox
-          
+          color="#d9a91a"
           checked={gender === "female"}
           onPress={() => onChange("female")}
         />
@@ -125,7 +146,7 @@ const Gender = props => {
 
       <View style={{ flexDirection: "row" }}>
         <CheckBox
-          
+          color="#d9a91a"
           checked={gender === "male"}
           onPress={() => onChange("male")}
         />

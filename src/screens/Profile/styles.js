@@ -379,4 +379,12 @@ export default {
     backgroundColor: "#f2f2f2",
     alignSelf: 'center'
   },
+  desc: {
+    marginTop: 10,
+    height: 45,
+    color: "#404040",
+    fontFamily: "Lato",
+    fontSize: 12,
+    fontStyle: "italic"
+  },
 };

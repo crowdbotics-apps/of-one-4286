@@ -400,5 +400,13 @@ export default {
     fontSize: 10,
     fontWeight: "400",
     letterSpacing: 0.5
+  },
+  headerText: {
+    height: 20,
+    color: "#d9a91a",
+    fontFamily: "Lato_Bold",
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 15
   }
 };
