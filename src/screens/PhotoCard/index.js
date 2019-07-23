@@ -39,7 +39,8 @@ class PhotoCard extends Component {
       opac: 0,
       users: [],
       loading: false,
-      expand: true
+      expand: true,
+      matched: '',
     };
   }
 
@@ -388,6 +389,8 @@ class PhotoCard extends Component {
                   <Text style={styles.buttonText}>LIKE</Text>
                 </Button>
               </View>
+
+
             </View>
           </TouchableOpacity>
         )}

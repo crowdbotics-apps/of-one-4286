@@ -205,12 +205,23 @@ class chatScreen extends Component {
     return (
       <Bubble
         {...props}
+        textStyle={{
+          right: {
+            color: '#0d0d0d',
+          },
+          left: {
+            //backgroundColor: "#f0f0f0"
+            color: '#0d0d0d',
+          },
+        }}
         wrapperStyle={{
           left: {
-            backgroundColor: "#f0f0f0"
+            //backgroundColor: "#f0f0f0"
+            backgroundColor: '#e4c25e',
           },
           right: {
-            backgroundColor: "#F7524C"
+            //backgroundColor: "#F7524C"
+            backgroundColor: 'rgba(189, 191, 191, 0.65)',
           }
         }}
       />
@@ -272,7 +283,7 @@ class chatScreen extends Component {
                 transparent
                 onPress={() => this.props.navigation.goBack()}
               >
-                <Icon name="md-arrow-back" />
+                <Icon name="md-arrow-back" style={{color: '#d9a91a'}}/>
               </Button>
             </Left>
             <Body style={{flex:3}}>
@@ -294,11 +305,11 @@ class chatScreen extends Component {
               //  _id: 1 // sent messages should have same user._id
               //}}
               user={this.user}
-              renderActions={this.renderCustomActions}
+              //renderActions={this.renderCustomActions}
               renderBubble={this.renderBubble}
               renderFooter={this.renderFooter}
               renderAvatar={this.renderAvatar}
-              renderSend={this.renderSend}
+              //renderSend={this.renderSend}
             />
           </View>
         </Container>

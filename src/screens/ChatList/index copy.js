@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { Text, FlatList, ListView } from "react-native";
+import { Text, FlatList } from "react-native";
 import {
   Container,
   Content,
@@ -14,8 +14,6 @@ import {
   Right,
   Body
 } from "native-base";
-
-
 import { NavigationActions } from "react-navigation";
 import styles from "./styles";
 // import data from "./data";
@@ -52,17 +50,16 @@ class ChatList extends Component {
       };
     });
 
-    // const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-
-
     return (
       <Container style={{ backgroundColor: "#FFF" }}>
         <Header>
           <Left>
-            <Title style={styles.navTitle}>Messages</Title>
+            <Button transparent onPress={() => navigation.goBack()}>
+              <Icon name="md-arrow-back" />
+            </Button>
           </Left>
           <Body>
-            <React.Fragment/>
+            <Title>Matches</Title>
           </Body>
           <Right />
         </Header>
@@ -83,14 +80,13 @@ class ChatList extends Component {
                 </Left>
                 <Body>
                   <Text style={styles.userNameText}>{item.name}</Text>
-                  <Text style={styles.newMatch}>New Match</Text>
+                  {/* <Text style={styles.distanceText}>
+                    {dataRow.distance}
+                  </Text> */}
                 </Body>
               </ListItem>
             )}
-            
           />
-
-
         </Content>
       </Container>
     );

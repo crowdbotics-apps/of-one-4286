@@ -49,7 +49,7 @@ const HomeTabNavigation = createBottomTabNavigator(
                 small
                 source={
                   props.navigation.state.index === 2
-                    ? require("../../../assets/logo.png")
+                    ? require("../../../assets/chat.png")
                     : require("../../../assets/chat1.png")
                 }
                 resizeMode='contain'
