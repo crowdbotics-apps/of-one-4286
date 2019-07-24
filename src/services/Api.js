@@ -167,8 +167,11 @@ export const getUser_API = async uid => {
   }
 };
 
-export const getUsersNearby_API = async ({ long, lat }, mile) => {
+export const getUsersNearby_API = async ({ long, lat }, distance) => {
   try {
+    let mile = Number(distance);
+    if (mile == NaN || mile == null) mile = 10;
+
     // ~1 mile of lat and lon in degrees
     let lat1 = 0.0144927536231884;
     let long1 = 0.0181818181818182;
@@ -198,16 +201,13 @@ export const getUsersNearby_API = async ({ long, lat }, mile) => {
 
     const users = querySS.docs.map(docSS => {
       const user = docSS.data();
-      
+
+      // compare age range
       if (user.uid != auth.currentUser.uid && user.showMeOnApp) {
-        // console.log('lusers querySS.docs',user)
         return user;
       }
       return null;
     });
-
-
-     
 
     return {
       status: true,
@@ -355,7 +355,7 @@ export const updUserImages_API = async (uid, image, uri) => {
         id: image
       };
       ref.set(item);
-    }else{
+    } else {
       const item = {
         uri: uri,
         id: image
@@ -515,14 +515,14 @@ export const checkMatch_API = async (uid, who) => {
 
     const ss = await refPerson.get();
 
-    if (!ss.exists ) {
+    if (!ss.exists) {
       // console.log('checkMatch_API', who)
       const match = {
         name: who.name,
         age: who.age,
         email: who.email,
         uid: who.uid,
-        image: who.image,
+        image: who.image
       };
       let ref = store
         .collection("users")
@@ -542,7 +542,7 @@ export const checkMatch_API = async (uid, who) => {
         age: me.age,
         email: me.email,
         uid: me.uid,
-        image: me.image,
+        image: me.image
       };
       let refPerson = store
         .collection("users")
@@ -740,7 +740,7 @@ export const deleteImage = async (uid, imageName) => {
 
     if (uri.length > 0) {
       ref.delete();
-      return 'File Deleted'
+      return "File Deleted";
     } else return "File Not Found";
   } catch (error) {
     console.log(error);

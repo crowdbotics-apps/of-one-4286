@@ -28,6 +28,7 @@ import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 import { Constants, Location, Permissions } from "expo";
 import Swiper from "react-native-swiper";
+import { ScrollView } from "react-native-gesture-handler";
 var Dimensions = require("Dimensions");
 var { width, height } = Dimensions.get("window");
 
@@ -40,7 +41,7 @@ class PhotoCard extends Component {
       users: [],
       loading: false,
       expand: true,
-      matched: '',
+      matched: ""
     };
   }
 
@@ -55,11 +56,18 @@ class PhotoCard extends Component {
     }
 
     let location = await Location.getCurrentPositionAsync({});
-    // console.log('location',   //longitude)
+    let addArr = await Location.reverseGeocodeAsync({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude
+    });
+
+    let addObj = addArr && addArr.length > 0 && addArr[0];
+    let address = addObj.city + ", " + addObj.region;
 
     this.props.updateUser(this.props.user.uid, {
       lat: location.coords.latitude,
-      long: location.coords.longitude
+      long: location.coords.longitude,
+      address
     });
 
     return location;
@@ -70,37 +78,12 @@ class PhotoCard extends Component {
     const location = await this._getLocationAsync();
     const { latitude, longitude } = location.coords;
 
-    const { unlikes, user } = this.props;
-    const resUsers = await API.getUsersNearby_API(
-      { long: longitude, lat: latitude },
-      user.distance
-    );
-
-    let users = [];
-    if (resUsers.status) {
-      users = resUsers.data;
-
-      users = users.filter(
-        item => unlikes.filter(unlike => unlike.uid == item.uid).length == 0
-      );
-
-      if (!user.showMeWomen)
-        users = users.filter(item => item.gender != "female");
-
-      if (!user.showMeMen) users = users.filter(item => item.gender != "male");
-
-      // console.log('users ',users)
-
-      const { getPerson } = this.props;
-      await getPerson(users[0].uid);
-
-      this.setState({ users, loading: false, longitude, latitude });
-    }
+    this.setState({ longitude, latitude }, this.onRefresh);
   }
 
   onRefresh = async () => {
     // const resUsers = await API.getUsers_API();
-    const { unlikes, user } = this.props;
+    const { unlikes, user, likes } = this.props;
     const resUsers = await API.getUsersNearby_API(
       { long: this.state.longitude, lat: this.state.latitude },
       user.distance
@@ -116,24 +99,33 @@ class PhotoCard extends Component {
           0
       );
 
-      if (!user.showMeWomen)
-        users = users.filter(item => item.gender != "female");
+      users = users.filter(
+        item =>
+          this.props.likes.filter(like => like.uid == item.uid).length == 0
+      );
 
-      if (!user.showMeMen) users = users.filter(item => item.gender != "male");
+      users = users.filter(item => item.gender != user.gender);
 
-      console.log("users", users, this.props.unlikes);
-      if (Array.isArray(users) && users.length > 0) {
-        this._deckSwiper._root.setState({
-          lastCard: false,
-          card1Top: true,
-          card2Top: true,
-          disabled: false,
-          selectedItem: users[0]
-          //selectedItem2: users[1]
-        });
+      let min = Number(user.minAge);
+      if (isNaN(min)) min = user.age - 10;
+      let max = Number(user.maxAge);
+      if (isNaN(max)) max = user.age + 10;
+      users = users.filter(item => item.age > min && item.age < max);
 
-        this.setState({ users });
+      let person = Array.isArray(users) && users[0];
+      let images = null;
+      if (person) {
+        const res = await API.getImages_API(person.uid);
+        if (res.status) {
+          //const images = res.data;
+          images = res.data.filter(image => image.uri != "");
+        }
       }
+
+      console.log('images', images)
+
+      //list person
+      this.setState({ users, images, loading: false });
     }
   };
 
@@ -154,48 +146,6 @@ class PhotoCard extends Component {
     this._deckSwiper._root.swipeLeft();
   };
 
-  onSuperLike = async () => {
-    const { user, like, checkMatch } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
-
-    await like(user.uid, selectedItem, true);
-    checkMatch(user.uid, selectedItem);
-    this._deckSwiper._root.swipeRight();
-
-    // const navigation = this.props.navigation;
-    // navigation.navigate("PhotoCardDetails")
-  };
-
-  onSwiping = async (dir, opa) => {
-    // const { user, unlike, like } = this.props;
-    // const { selectedItem2 } = this._deckSwiper._root.state;
-
-    // console.log('user', user)
-
-    this.setState({ direction: dir, opac: opa });
-
-    // if (dir == "left") {
-    //   unlike(user.uid, selectedItem2);
-    // } else {
-    //   like(user.uid, selectedItem2, false);
-    // }
-  };
-
-  onSwipeRight = async () => {
-    const { user, like, checkMatch } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
-
-    await like(user.uid, selectedItem, false);
-    checkMatch(user.uid, selectedItem);
-  };
-
-  onSwipeLeft = async () => {
-    const { user, unlike } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
-
-    unlike(user.uid, selectedItem);
-  };
-
   changeStage = () => {
     console.log("expand", this.state.expand);
     this.setState({
@@ -203,6 +153,12 @@ class PhotoCard extends Component {
     });
 
     console.log("expand", this.state.expand);
+  };
+
+  onTryAgain = () => {
+    this.setState({ loading: true });
+
+    this.onRefresh();
   };
 
   renderNoUser = () => {
@@ -214,8 +170,15 @@ class PhotoCard extends Component {
             source={require("../../../assets/warning.png")}
             ResizeMode="contain"
           />
-          <Text style={styles.textNoUser}>We ran into a problem loading people, sorry about that.</Text>
-          <Button block rounded style={styles.buttonTryAgain} onPress={this.onPrevious}>
+          <Text style={styles.textNoUser}>
+            We ran into a problem loading people, sorry about that.
+          </Text>
+          <Button
+            block
+            rounded
+            style={styles.buttonTryAgain}
+            onPress={this.onTryAgain}
+          >
             <Text style={styles.buttonText}>TRY AGAIN</Text>
           </Button>
         </View>
@@ -224,19 +187,14 @@ class PhotoCard extends Component {
   };
 
   render() {
-    //return this.renderNoUser();
-
     const { users } = this.state;
-    const { person } = this.props;
-    //const data1 = users.filter(item => item.uid != null);
 
     const navigation = this.props.navigation;
     if (this.state.loading) return <Spinner />;
 
-    // if (users.length < 2) return <Text>No user found.</Text>;
+    if (users.length == 0) return this.renderNoUser();
 
-    if (!person) return <Spinner />;
-
+    let person = users[0];
     return (
       <Container style={styles.wrapper}>
         <View style={styles.instagramPhotosCarousel}>
@@ -287,21 +245,20 @@ class PhotoCard extends Component {
         </View>
 
         {this.state.expand ? (
-          <TouchableOpacity onPress={this.changeStage}>
-            <View style={styles.body}>
-              <Text style={styles.nameText}>{person.name} 22</Text>
-              <Text style={styles.address}>Manhattan, New York</Text>
-              <Text style={styles.church}>St. Mary & St. Mark Church</Text>
-              <Text style={styles.desc}>
-                This is a concept of a dating app specifically targeting the
-                Coptic Orthodox community. I’m not sure what else to type here,
-                trying to fill this up as much as I can.
+          <View style={styles.body} onPress={this.changeStage}>
+            <ScrollView style={{flex: 1}} >
+              <Text style={styles.nameText}>
+                {person.name} {person.age}
               </Text>
+              <Text style={styles.address}>{person.address}</Text>
+              <Text style={styles.church}>{person.church}</Text>
+              <Text style={styles.desc}>{person.aboutMe}</Text>
 
               <View>
                 <Text style={styles.photo}>Photos</Text>
               </View>
-              <View>
+              
+              <View style={{marginBottom: 100}}>
                 <Swiper
                   width={width}
                   height={
@@ -332,9 +289,10 @@ class PhotoCard extends Component {
                 >
                   <View style={styles.instagramCarouselView}>
                     {Array.isArray(this.state.images) ? (
-                      this.state.images.map(image => {
+                      this.state.images.map((image,i ) => {
                         return (
                           <Image
+                            key={i}
                             style={styles.thumbnail}
                             source={{ uri: image.uri }}
                             resizeMode="contain"
@@ -364,14 +322,16 @@ class PhotoCard extends Component {
                   <Text style={styles.buttonText}>LIKE</Text>
                 </Button>
               </View>
-            </View>
-          </TouchableOpacity>
+            </ScrollView>
+          </View>
         ) : (
           <TouchableOpacity onPress={this.changeStage}>
             <View style={[styles.body, { height: 220 }]}>
-              <Text style={styles.nameText}>{person.name} 22</Text>
-              <Text style={styles.address}>Manhattan, New York</Text>
-              <Text style={styles.church}>St. Mary & St. Mark Church</Text>
+              <Text style={styles.nameText}>
+                {person.name} {person.age}
+              </Text>
+              <Text style={styles.address}>{person.address}</Text>
+              <Text style={styles.church}>{person.church}</Text>
 
               <View style={styles.buttons}>
                 <TouchableOpacity>
@@ -389,8 +349,6 @@ class PhotoCard extends Component {
                   <Text style={styles.buttonText}>LIKE</Text>
                 </Button>
               </View>
-
-
             </View>
           </TouchableOpacity>
         )}
@@ -403,7 +361,8 @@ export default connect(
   state => ({
     user: state.global.user,
     unlikes: state.global.unlikes,
-    person: state.global.person
+    person: state.global.person,
+    likes: state.global.likes
   }),
   {
     like: Actions.like,
