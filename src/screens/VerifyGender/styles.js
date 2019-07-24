@@ -9,7 +9,7 @@ export default {
   header: {
     height: 33,
     color: "#d9a91a",
-    fontFamily: "Lato",
+    fontFamily: "Lato_Bold",
     fontSize: 18,
     fontWeight: "700",
     marginTop: 99,
