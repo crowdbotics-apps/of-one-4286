@@ -27,40 +27,48 @@ import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
+import * as ActionType from "../../redux/actionType";
+
 var deviceHeight = Dimensions.get("window").height;
 var deviceWidth = Dimensions.get("window").width;
 
 class VerifyChurch extends Component {
   state = {
-    gender: ""
+    church: ""
   };
 
-  onChangeGender = gender => {
-    this.setState({
-      gender: gender
-    });
-  };
 
-  setDate = newDate => {
-    console.log(newDate);
-    const num = parseInt(moment(newDate).fromNow());
-    const min = num - 3 < 21 ? 21 : num - 3;
-    const max = num + 3 > 100 ? 100 : num + 3;
-    this.setState({
-      dob: moment(newDate).format("X"),
-      age: num,
-      min,
-      max,
-      date: newDate
-    });
-  };
 
-  onContinue = () => {
-    this.props.navigation.navigate('HomeTabNavigation')
+  onContinue = async () => {
+    const { updateUser, user } = this.props;
+    const {
+      church
+    } = this.state;
+   
+
+    const updObj = {
+      church
+    };
+    
+    if(church == null || church == ''){
+      alert('Please add your church!')
+      return 
+    }
+
+    res = await updateUser(user.uid, updObj);
+
+
+    if (res.type == ActionType.UPDATE_USER_OK)
+      this.props.navigation.navigate('HomeTabNavigation')
+    else 
+      alert("There is an unexpected error, please try again!");
+
+
   }
 
   onPrevious = () => {
-    this.props.navigation.goBack()
+    
+    this.props.navigation.navigate("VerifyGender");
   }
 
   render() {
@@ -87,11 +95,11 @@ class VerifyChurch extends Component {
               placeholder="Add your church here"
               placeholderTextColor="grey"
               autoCapitalize="none"
-              onChangeText={username => this.setState({ username })}
-              value={this.state.username}
+              onChangeText={church => this.setState({ church })}
+              value={this.state.church}
             />
           </Item>
-
+          <Text style={styles.requiredText}>Required</Text>
          
 
           <View
@@ -169,6 +177,6 @@ export default connect(
     user: state.global.user
   }),
   {
-    loginFB: Actions.loginFB
+    updateUser: Actions.updateUser,
   }
 )(VerifyChurch);

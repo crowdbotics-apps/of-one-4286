@@ -9,7 +9,7 @@ export default {
   header: {
     height: 33,
     color: "#d9a91a",
-    fontFamily: "Lato",
+    fontFamily: "Lato_Bold",
     fontSize: 18,
     fontWeight: "700",
     marginTop: 99,
@@ -73,5 +73,15 @@ export default {
     fontSize: 12,
     fontWeight: "400"
   },
-
+  requiredText: {
+    width: deviceWidth - 100,
+    alignSelf: "center",
+    marginTop: 5,
+    height: 17,
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 10,
+    fontWeight: "400",
+    letterSpacing: 0.05
+  }
 };
