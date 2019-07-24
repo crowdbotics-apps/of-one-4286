@@ -69,7 +69,9 @@ export default {
     width: deviceWidth - 60,
     alignSelf: "center",
     backgroundColor: "#3B5998",
-    marginTop: 150
+    marginTop: 150,
+    position: 'absolute',
+    bottom: deviceHeight * 1/4,
   },
   loginBtnText: {
     fontSize: 15,
@@ -80,9 +82,12 @@ export default {
     bottom: 10
   },
   noteText: {
-    color: commonColor.lightTextColor,
-    fontSize: 12,
-    textAlign: "center"
+    height: 12,
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 10,
+    fontWeight: "400",
+    letterSpacing: 0.05
   },
   brand: {
     height: 71,
@@ -110,6 +115,8 @@ export default {
     fontSize: 10,
     fontWeight: "400",
     letterSpacing: 0.05,
-    width: deviceWidth - 70
+    width: deviceWidth - 70,
+    position: 'absolute',
+    bottom: deviceHeight * 1/4 - 20,
   }
 };

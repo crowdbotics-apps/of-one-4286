@@ -43,7 +43,14 @@ class Login extends Component {
         style={{ width: "100%", height: "100%" }}
       >
         <Container style={{ backgroundColor: "#00000099" }}>
-          <Content scrollEnabled={false} contentContainerStyle={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Content
+            scrollEnabled={false}
+            contentContainerStyle={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
             {/* <Swiper
             height={deviceHeight / 1.3}
             loop={false}
@@ -115,9 +122,11 @@ class Login extends Component {
             </View>
           </Swiper>*/}
 
-            <View >
+            <View>
               <Text style={styles.brand}>Of One</Text>
-              <Text style={styles.subBrand}>A dating app for Coptics, by Coptics</Text>
+              <Text style={styles.subBrand}>
+                A dating app for Coptics, by Coptics
+              </Text>
             </View>
             <Button
               block
@@ -129,12 +138,12 @@ class Login extends Component {
             </Button>
             <Text style={styles.note}>We’ll never post anything</Text>
           </Content>
-          {/* <View style={styles.noteView}>
-          <Text style={styles.noteText}>
-            By signing in, you agree with our terms of services and privacy
-            settings
-          </Text>
-        </View> */}
+          <View style={styles.noteView}>
+            <Text style={styles.noteText}>
+              By signing in, you agree with our terms of services and privacy
+              settings
+            </Text>
+          </View>
         </Container>
       </ImageBackground>
     );
