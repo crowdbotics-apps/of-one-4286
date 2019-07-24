@@ -54,6 +54,11 @@ class VerifyBirthday extends Component {
       dob,
     };
 
+    if(dob == null || dob == ''){
+      alert('Please add your birthday!')
+      return 
+    }
+
     res = await updateUser(user.uid, updObj);
 
     //success('Settings has been saved')
