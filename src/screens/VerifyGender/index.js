@@ -25,12 +25,14 @@ import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
+import * as ActionType from "../../redux/actionType";
+
 var deviceHeight = Dimensions.get("window").height;
 var deviceWidth = Dimensions.get("window").width;
 
 class VerifyGender extends Component {
   state = {
-    gender: ""
+    gender: "male"
   };
 
   onChangeGender = gender => {
@@ -39,26 +41,32 @@ class VerifyGender extends Component {
     });
   };
 
-  setDate = newDate => {
-    console.log(newDate);
-    const num = parseInt(moment(newDate).fromNow());
-    const min = num - 3 < 21 ? 21 : num - 3;
-    const max = num + 3 > 100 ? 100 : num + 3;
-    this.setState({
-      dob: moment(newDate).format("X"),
-      age: num,
-      min,
-      max,
-      date: newDate
-    });
-  };
 
-  onContinue = () => {
-    this.props.navigation.navigate("VerifyChurch");
+  onContinue = async () => {
+    const { updateUser, user } = this.props;
+    const {
+      gender
+    } = this.state;
+   
+
+    const updObj = {
+      gender
+    };
+
+
+    res = await updateUser(user.uid, updObj);
+
+
+    if (res.type == ActionType.UPDATE_USER_OK)
+      this.props.navigation.navigate('VerifyChurch')
+    else 
+      alert("There is an unexpected error, please try again!");
+
+
   };
 
   onPrevious = () => {
-    this.props.navigation.goBack();
+    this.props.navigation.navigate("VerifyBirthday");
   };
 
   render() {
@@ -161,6 +169,6 @@ export default connect(
     user: state.global.user
   }),
   {
-    loginFB: Actions.loginFB
+    updateUser: Actions.updateUser,
   }
 )(VerifyGender);
