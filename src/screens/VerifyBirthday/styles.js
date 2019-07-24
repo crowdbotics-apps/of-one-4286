@@ -14,16 +14,15 @@ export default {
     fontWeight: "700",
     marginTop: 99,
     marginBottom: 18,
-    marginLeft: 30,
+    marginLeft: 30
   },
   headerWrap: {
     height: 150,
     borderColor: "rgba(0, 0, 0, 0.15)",
     shadowOffset: { width: 2, height: 0 },
     shadowRadius: 6,
-    borderWidth: '1',
-    backgroundColor: "#f2f2f2",
-
+    borderWidth: "1",
+    backgroundColor: "#f2f2f2"
   },
   button: {
     width: 146,
@@ -34,7 +33,7 @@ export default {
     borderWidth: 2,
     backgroundColor: "#f2f2f2",
     marginLeft: deviceWidth - 175,
-    marginTop: 50,
+    marginTop: 50
   },
   buttonText: {
     color: "#d9a91a",
@@ -49,12 +48,22 @@ export default {
   },
   dateInput: {
     width: deviceWidth - 60,
-                height: 45,
-                borderRadius: 10,
-                borderColor: "#bdbfbf",
-                borderStyle: "solid",
-                borderWidth: 2,
-                paddingLeft: 15
+    height: 45,
+    borderRadius: 10,
+    borderColor: "#bdbfbf",
+    borderStyle: "solid",
+    borderWidth: 2,
+    paddingLeft: 15
+  },
+  requiredText: {
+    width: deviceWidth - 100,
+    alignSelf: "center",
+    marginTop: 5,
+    height: 17,
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 10,
+    fontWeight: "400",
+    letterSpacing: 0.05
   }
-
 };

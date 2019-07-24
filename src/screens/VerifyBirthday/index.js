@@ -16,6 +16,8 @@ import { connect } from "react-redux";
 import * as Actions from "../../redux/action";
 import DatePicker from "react-native-datepicker";
 import moment from "moment";
+import * as ActionType from "../../redux/actionType";
+
 var deviceHeight = Dimensions.get("window").height;
 var deviceWidth = Dimensions.get("window").width;
 
@@ -28,19 +30,40 @@ class VerifyBirthday extends Component {
   setDate = newDate => {
     console.log(newDate);
     const num = parseInt(moment(newDate).fromNow());
-    const min = num - 3 < 21 ? 21 : num - 3;
-    const max = num + 3 > 100 ? 100 : num + 3;
+
     this.setState({
-      dob: moment(newDate).format("X"),
+      dob: Number(moment(newDate).format("X")),
       age: num,
-      min,
-      max,
       date: newDate
     });
   };
 
-  onContinue = () => {
-    this.props.navigation.navigate('VerifyGender')
+  onContinue = async () => {
+    //save data
+    // console.log(this.state) 
+    const { updateUser, user } = this.props;
+    const {
+      dob,
+      age,
+    } = this.state;
+   
+
+    const updObj = {
+      
+      age,
+      dob,
+    };
+
+    res = await updateUser(user.uid, updObj);
+
+    //success('Settings has been saved')
+
+    if (res.type == ActionType.UPDATE_USER_OK)
+      this.props.navigation.navigate('VerifyGender')
+    else 
+      alert("There is an unexpected error, please try again!");
+
+    
   }
 
   render() {
@@ -111,6 +134,7 @@ class VerifyBirthday extends Component {
             }}
             onDateChange={this.setDate}
           />
+          <Text style={styles.requiredText}>Required</Text>
 
           <Button
             block
@@ -137,6 +161,6 @@ export default connect(
     user: state.global.user
   }),
   {
-    loginFB: Actions.loginFB
+    updateUser: Actions.updateUser,
   }
 )(VerifyBirthday);
