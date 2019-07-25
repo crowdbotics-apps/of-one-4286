@@ -338,6 +338,20 @@ export default {
     backgroundColor: "#f2f2f2"
     //marginLeft: deviceWidth - 175,
   },
+  collapse: {
+    position: "absolute",
+    top: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    right: width / 2,
+    zIndex: 1,
+  },
+  icon: {
+    height: 60,
+    width: width,
+    color: "#f2f2f2",
+
+  },
   buttonText: {
     color: "#d9a91a",
     fontFamily: "Lato",

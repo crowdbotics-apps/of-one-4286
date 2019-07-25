@@ -142,6 +142,72 @@ export const getMatchings_API = async uid => {
   }
 };
 
+export const getLikes_API = async uid => {
+  try {
+    const querySS = await store
+      .collection("users")
+      .doc(uid)
+      .collection("likes")
+      .get();
+
+    if (querySS.empty) {
+      return {
+        status: true,
+        message: "No data found",
+        data: []
+      };
+    }
+
+    const likes = querySS.docs.map(docSS => {
+      return docSS.data();
+    });
+
+    return {
+      status: true,
+      data: likes
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
+export const getUnLikes_API = async uid => {
+  try {
+    const querySS = await store
+      .collection("users")
+      .doc(uid)
+      .collection("unlikes")
+      .get();
+
+    if (querySS.empty) {
+      return {
+        status: true,
+        message: "No data found",
+        data: []
+      };
+    }
+
+    const unlikes = querySS.docs.map(docSS => {
+      return docSS.data();
+    });
+
+    return {
+      status: true,
+      data: unlikes
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "ERROR: " + error.message
+    };
+  }
+};
+
 export const getUser_API = async uid => {
   try {
     let ref = store.collection("users").doc(uid);

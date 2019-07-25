@@ -89,7 +89,9 @@ class PhotoCard extends Component {
       user.distance
     );
 
+
     let users = [];
+
     if (resUsers.status) {
       users = resUsers.data;
 
@@ -98,6 +100,9 @@ class PhotoCard extends Component {
           this.props.unlikes.filter(unlike => unlike.uid == item.uid).length ==
           0
       );
+
+      console.log('length', users.length, likes.length, unlikes.length)
+
 
       users = users.filter(
         item =>
@@ -122,28 +127,59 @@ class PhotoCard extends Component {
         }
       }
 
-      console.log('images', images)
-
       //list person
       this.setState({ users, images, loading: false });
     }
   };
 
   onLike = async person => {
+    this.setState({ loading: true });
     const { user, like, checkMatch } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
+    const { users } = this.state;
 
-    await like(user.uid, selectedItem, false);
-    checkMatch(user.uid, selectedItem);
-    this._deckSwiper._root.swipeRight();
+    await like(user.uid, person, false);
+    checkMatch(user.uid, person);
+
+    // let updUsers = users.filter(
+    //   item =>
+    //     this.props.likes.filter(like => like.uid != item.uid).length == 0
+    // );
+
+    let updUsers = users.filter(item => item.uid != person.uid);
+
+    let updPerson = Array.isArray(updUsers) && updUsers[0];
+    let images = null;
+    if (updPerson) {
+      const res = await API.getImages_API(updPerson.uid);
+      if (res.status) {
+        //const images = res.data;
+        images = res.data.filter(image => image.uri != "");
+      }
+    }
+
+    this.setState({ users: updUsers, images, loading: false });
   };
 
   onUnLike = async person => {
+    this.setState({ loading: true });
     const { user, unlike } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
+    const { users } = this.state;
 
-    unlike(user.uid, selectedItem);
-    this._deckSwiper._root.swipeLeft();
+    unlike(user.uid, person);
+
+    let updUsers = users.filter(item => item.uid != person.uid);
+
+    let updPerson = Array.isArray(updUsers) && updUsers[0];
+    let images = null;
+    if (updPerson) {
+      const res = await API.getImages_API(updPerson.uid);
+      if (res.status) {
+        //const images = res.data;
+        images = res.data.filter(image => image.uri != "");
+      }
+    }
+
+    this.setState({ users: updUsers, images, loading: false });
   };
 
   changeStage = () => {
@@ -155,8 +191,12 @@ class PhotoCard extends Component {
     console.log("expand", this.state.expand);
   };
 
-  onTryAgain = () => {
+  onTryAgain = async () => {
     this.setState({ loading: true });
+    const { user } = this.props;
+
+    await this.props.getLikes(user.uid);
+    await this.props.getUnLikes(user.uid);
 
     this.onRefresh();
   };
@@ -227,6 +267,7 @@ class PhotoCard extends Component {
                     ? require("../../../assets/launchscreen.png")
                     : { uri: person.image }
                 }
+                resizeMode="cover"
               />
             </View>
             {/* <View style={styles.slideView}>
@@ -246,7 +287,7 @@ class PhotoCard extends Component {
 
         {this.state.expand ? (
           <View style={styles.body} onPress={this.changeStage}>
-            <ScrollView style={{flex: 1}} >
+            <ScrollView style={{ flex: 1 }}>
               <Text style={styles.nameText}>
                 {person.name} {person.age}
               </Text>
@@ -257,8 +298,8 @@ class PhotoCard extends Component {
               <View>
                 <Text style={styles.photo}>Photos</Text>
               </View>
-              
-              <View style={{marginBottom: 100}}>
+
+              <View style={{ marginBottom: 25 }}>
                 <Swiper
                   width={width}
                   height={
@@ -289,7 +330,7 @@ class PhotoCard extends Component {
                 >
                   <View style={styles.instagramCarouselView}>
                     {Array.isArray(this.state.images) ? (
-                      this.state.images.map((image,i ) => {
+                      this.state.images.map((image, i) => {
                         return (
                           <Image
                             key={i}
@@ -307,7 +348,7 @@ class PhotoCard extends Component {
               </View>
 
               <View style={styles.buttons}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={this.onUnLike.bind(this, person)}>
                   <Image
                     source={require("../../../assets/Pass_Button.png")}
                     style={styles.close}
@@ -317,15 +358,24 @@ class PhotoCard extends Component {
                   block
                   rounded
                   style={styles.button}
-                  onPress={this.onPrevious}
+                  onPress={this.onLike.bind(this, person)}
                 >
                   <Text style={styles.buttonText}>LIKE</Text>
                 </Button>
               </View>
+              <View style={styles.collapse}>
+                <TouchableOpacity onPress={this.changeStage}>
+                  <Icon
+                    name="arrow-collapse-down"
+                    type="MaterialCommunityIcons"
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+              </View>
             </ScrollView>
           </View>
         ) : (
-          <TouchableOpacity onPress={this.changeStage}>
+          <View onPress={this.changeStage}>
             <View style={[styles.body, { height: 220 }]}>
               <Text style={styles.nameText}>
                 {person.name} {person.age}
@@ -334,7 +384,7 @@ class PhotoCard extends Component {
               <Text style={styles.church}>{person.church}</Text>
 
               <View style={styles.buttons}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={this.onUnLike.bind(this, person)}>
                   <Image
                     source={require("../../../assets/Pass_Button.png")}
                     style={styles.close}
@@ -344,13 +394,22 @@ class PhotoCard extends Component {
                   block
                   rounded
                   style={styles.button}
-                  onPress={this.onPrevious}
+                  onPress={this.onLike.bind(this, person)}
                 >
                   <Text style={styles.buttonText}>LIKE</Text>
                 </Button>
               </View>
+              <View style={styles.collapse}>
+                <TouchableOpacity onPress={this.changeStage}>
+                  <Icon
+                    name="arrow-collapse-down"
+                    type="MaterialCommunityIcons"
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-          </TouchableOpacity>
+          </View>
         )}
       </Container>
     );
@@ -369,6 +428,8 @@ export default connect(
     unlike: Actions.unlike,
     checkMatch: Actions.checkMatch,
     updateUser: Actions.updateUser,
-    getPerson: Actions.getPerson
+    getPerson: Actions.getPerson,
+    getLikes: Actions.getLikes,
+    getUnLikes: Actions.getUnLikes
   }
 )(PhotoCard);

@@ -177,6 +177,48 @@ export const getMatchings = async (uid) => {
 };
 
 //uid - firebase uid - key
+export const getLikes = async (uid) => {
+  const res = await API.getLikes_API(uid);
+  // console.log('checkMatch', res)
+  if (res.status)
+    return {
+      type: ActionType.UPDATE_LIKE_OK,
+      payload: {
+        likes: res.data
+      }
+    };
+  else {
+    return {
+      type: ActionType.UPDATE_LIKE_NOK,
+      payload: {
+        message: res.message
+      }
+    };
+  }
+};
+
+//uid - firebase uid - key
+export const getUnLikes = async (uid) => {
+  const res = await API.getUnLikes_API(uid);
+  // console.log('checkMatch', res)
+  if (res.status)
+    return {
+      type: ActionType.UPDATE_UNLIKE_OK,
+      payload: {
+        unlikes: res.data
+      }
+    };
+  else {
+    return {
+      type: ActionType.UPDATE_UNLIKE_NOK,
+      payload: {
+        message: res.message
+      }
+    };
+  }
+};
+
+//uid - firebase uid - key
 //image name - unique
 //uri - downloadable URI
 export const updateUserImages = async (uid, image, uri) => {

@@ -26,6 +26,8 @@ class LoadingScreen extends Component {
         //console.log('loading user: ', user )
         if (user ) {
           await this.props.getUser(user.uid)
+          await this.props.getLikes(user.uid)
+          await this.props.getUnLikes(user.uid)
           // this.props.navigation.navigate('Login');
           // return
 
@@ -69,6 +71,8 @@ export default connect(
   }),
   {
     getUser: Actions.getUser,
+    getLikes: Actions.getLikes,
+    getUnLikes: Actions.getUnLikes,
    
   }
 )(LoadingScreen);
