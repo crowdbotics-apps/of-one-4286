@@ -33,8 +33,8 @@ class ChatList extends Component {
   async componentDidMount() {
     await this.props.getMatchings(this.props.user.uid);
 
-    if (!(this.props.matchings.length > 0))
-      this.props.navigation.navigate("Chat");
+    // if (!(this.props.matchings.length > 0))
+    //   this.props.navigation.navigate("Chat");
   }
 
   render() {
@@ -43,6 +43,7 @@ class ChatList extends Component {
 
     const data = matchings.map(item => {
       return {
+       
         name: item.name,
         distance: "",
         thumbnail: !item.image

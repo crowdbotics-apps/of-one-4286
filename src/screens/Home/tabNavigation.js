@@ -1,6 +1,13 @@
 import React from "react";
 import { createBottomTabNavigator } from "react-navigation";
-import { Icon, Header, FooterTab, Button, Thumbnail, Footer } from "native-base";
+import {
+  Icon,
+  Header,
+  FooterTab,
+  Button,
+  Thumbnail,
+  Footer
+} from "native-base";
 import Profile from "../Profile";
 import PhotoCard from "../PhotoCard";
 import Chat from "../Chat";
@@ -29,11 +36,18 @@ const HomeTabNavigation = createBottomTabNavigator(
                     ? require("../../../assets/profile.png")
                     : require("../../../assets/profile1.png")
                 }
-                resizeMode='contain'
+                resizeMode="contain"
               />
             </Button>
 
-            <Button onPress={() => props.navigation.navigate("PhotoCard")}>
+            <Button
+              onPress={() =>
+                props.navigation.navigate("PhotoCard", {
+                  person: null,
+                  images: null
+                })
+              }
+            >
               <Thumbnail
                 small
                 source={
@@ -52,7 +66,7 @@ const HomeTabNavigation = createBottomTabNavigator(
                     ? require("../../../assets/chat.png")
                     : require("../../../assets/chat1.png")
                 }
-                resizeMode='contain'
+                resizeMode="contain"
               />
             </Button>
           </FooterTab>

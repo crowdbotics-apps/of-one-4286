@@ -1,10 +1,12 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 import {
   View,
   Text,
   Dimensions,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  Image,
+  TouchableOpacity
 } from "react-native";
 import {
   Container,
@@ -17,16 +19,16 @@ import {
   Body,
   Thumbnail
 } from "native-base";
-import {GiftedChat, Actions, Bubble, Send} from "react-native-gifted-chat";
+import { GiftedChat, Actions, Bubble, Send } from "react-native-gifted-chat";
 import CustomActions from "./CustomActions";
 import commonColor from "../../theme/variables/commonColor";
 import styles from "./styles";
-import Fire from './Fire';
+import Fire from "./Fire";
 import * as API from "../../services/Api";
 import { connect } from "react-redux";
-// import * as Actions from "../../redux/action";
+import * as MyActions from "../../redux/action";
 
-var {height} = Dimensions.get("window");
+var { height } = Dimensions.get("window");
 
 class chatScreen extends Component {
   constructor(props) {
@@ -52,18 +54,18 @@ class chatScreen extends Component {
   }
 
   get person() {
-    const { person } = this.props.navigation.state.params
+    const { person } = this.props.navigation.state.params;
     return {
       name: person.name,
-      _id: person.uid,
+      _id: person.uid
     };
   }
 
   get user() {
-    const { user } = this.props
+    const { user } = this.props;
     return {
       name: user.name,
-      _id: user.uid,
+      _id: user.uid
     };
   }
 
@@ -76,28 +78,43 @@ class chatScreen extends Component {
     });
   }
 
-
   async componentDidMount() {
     // setTimeout(() => {
     //   this.setState({show: true});
     // }, 600);
-    const { person } = this.props.navigation.state.params
-    const { user } = this.props
+    const { person } = this.props.navigation.state.params;
+    const { user } = this.props;
 
-    await Fire.shared.init(user.uid, person.uid )
+    await Fire.shared.init(user.uid, person.uid);
 
     Fire.shared.on(messages =>
       this.setState(previousState => ({
-        messages: GiftedChat.append(previousState.messages, messages),
+        messages: GiftedChat.append(previousState.messages, messages)
       }))
     );
-    this.setState({show: true});
+    this.setState({ show: true });
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     Fire.shared.off();
   }
+
+  onAvatarPress = async person => {
+    const actionRes = await this.props.getPerson(person.uid);
+
+    let images = [];
+    const res = await API.getImages_API(person.uid);
+    if (res.status) {
+      //const images = res.data;
+      images = res.data.filter(image => image.uri != "");
+    }
+
+    this.props.navigation.navigate("PhotoCard", {
+      person: this.props.person,
+      images
+    });
+  };
 
   onLoadEarlier() {
     this.setState(previousState => {
@@ -207,21 +224,21 @@ class chatScreen extends Component {
         {...props}
         textStyle={{
           right: {
-            color: '#0d0d0d',
+            color: "#0d0d0d"
           },
           left: {
             //backgroundColor: "#f0f0f0"
-            color: '#0d0d0d',
-          },
+            color: "#0d0d0d"
+          }
         }}
         wrapperStyle={{
           left: {
             //backgroundColor: "#f0f0f0"
-            backgroundColor: '#e4c25e',
+            backgroundColor: "#e4c25e"
           },
           right: {
             //backgroundColor: "#F7524C"
-            backgroundColor: 'rgba(189, 191, 191, 0.65)',
+            backgroundColor: "rgba(189, 191, 191, 0.65)"
           }
         }}
       />
@@ -238,9 +255,9 @@ class chatScreen extends Component {
           alignItems: "center",
           alignSelf: "center",
           right: 10,
-          top: 3,
+          top: 3
         }}
-        textStyle={{color: commonColor.brandPrimary, margin: 0}}
+        textStyle={{ color: commonColor.brandPrimary, margin: 0 }}
       />
     );
   }
@@ -253,9 +270,7 @@ class chatScreen extends Component {
     if (this.state.typingText) {
       return (
         <View style={styles.footerContainer}>
-          <Text style={styles.footerText}>
-            {this.state.typingText}
-          </Text>
+          <Text style={styles.footerText}>{this.state.typingText}</Text>
         </View>
       );
     }
@@ -264,42 +279,52 @@ class chatScreen extends Component {
 
   render() {
     const navigation = this.props.navigation;
+    const { person } = this.props.navigation.state.params;
+
     if (!this.state.show) {
       return (
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <ActivityIndicator
             size="large"
             color={commonColor.brandPrimary}
-            style={{top: height / 2.2}}
+            style={{ top: height / 2.2 }}
           />
         </View>
       );
     } else {
       return (
-        <Container style={{backgroundColor: "#FFF"}}>
+        <Container style={{ backgroundColor: "#FFF" }}>
           <Header>
             <Left>
               <Button
                 transparent
                 onPress={() => this.props.navigation.goBack()}
               >
-                <Icon name="md-arrow-back" style={{color: '#d9a91a'}}/>
+                <Icon name="md-arrow-back" style={{ color: "#d9a91a" }} />
               </Button>
             </Left>
-            <Body style={{flex:3}}>
-              <Title>
-                {navigation.state.params.name}
-              </Title>
+            <Body style={{ flex: 3 }}>
+              <TouchableOpacity
+                onPress={this.onAvatarPress.bind(this, person)}
+                style={{ justifyContent: "center", alignItems: "center" }}
+              >
+                <Thumbnail
+                  small
+                  source={person.thumbnail}
+                  style={{ marginTop: -15 }}
+                />
+                <Title style={styles.title}>{person.name}</Title>
+              </TouchableOpacity>
             </Body>
             <Right />
           </Header>
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             <GiftedChat
               messages={this.state.messages}
               //onSend={this.onSend}
               onSend={Fire.shared.send}
               //loadEarlier={this.state.loadEarlier}
-             // onLoadEarlier={this.onLoadEarlier}
+              // onLoadEarlier={this.onLoadEarlier}
               //isLoadingEarlier={this.state.isLoadingEarlier}
               //user={{
               //  _id: 1 // sent messages should have same user._id
@@ -321,7 +346,9 @@ class chatScreen extends Component {
 export default connect(
   state => ({
     user: state.global.user,
+    person: state.global.person
   }),
   {
+    getPerson: MyActions.getPerson
   }
 )(chatScreen);

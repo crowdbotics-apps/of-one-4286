@@ -176,11 +176,12 @@ export default {
     fontWeight: "400"
   },
   church: {
-    height: 15,
-    color: "#404040",
+    height: 13,
+    color: "#bdbfbf",
     fontFamily: "Lato",
-    fontSize: 12,
-    fontWeight: "400"
+    fontSize: 10,
+    fontWeight: "400",
+    letterSpacing: 0.05
   },
   desc: {
     marginTop: 10,
@@ -313,6 +314,7 @@ export default {
     shadowColor: "rgba(0, 0, 0, 0.5)",
     shadowOffset: { width: 2, height: 0 },
     shadowRadius: 16,
+    shadowOpacity: 0.58,
     borderTopLeftRadius: 35,
     borderTopRightRadius: 35,
     borderBottomLeftRadius: 0,
@@ -322,11 +324,35 @@ export default {
     bottom: 0,
     padding: 15
   },
+  bodyMatched: {
+    width: width,
+    height: 249,
+    shadowColor: "#d9a91a",
+    shadowOffset: { width: 2, height: 0 },
+    shadowRadius: 99,
+    shadowOpacity: 0.58,
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    backgroundColor: "#f2f2f2",
+    position: "absolute",
+    bottom: 0,
+    padding: 15,
+
+  },
   buttons: {
     flexDirection: "row",
     position: "absolute",
     top: 10,
     right: 10
+  },
+  buttonsMatched: {
+    flexDirection: "row",
+    marginTop: 15,
+    width: "100%",
+    justifyContent: "space-between",
+    alignItems: "center"
   },
   button: {
     width: 100,
@@ -341,16 +367,15 @@ export default {
   collapse: {
     position: "absolute",
     top: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     right: width / 2,
-    zIndex: 1,
+    zIndex: 1
   },
   icon: {
     height: 60,
     width: width,
-    color: "#f2f2f2",
-
+    color: "#f2f2f2"
   },
   buttonText: {
     color: "#d9a91a",

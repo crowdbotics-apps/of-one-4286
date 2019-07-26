@@ -31,6 +31,7 @@ import Swiper from "react-native-swiper";
 import { ScrollView } from "react-native-gesture-handler";
 var Dimensions = require("Dimensions");
 var { width, height } = Dimensions.get("window");
+import * as ActionType from "../../redux/actionType";
 
 class PhotoCard extends Component {
   constructor(props) {
@@ -41,7 +42,7 @@ class PhotoCard extends Component {
       users: [],
       loading: false,
       expand: true,
-      matched: ""
+      matched: false //true
     };
   }
 
@@ -82,13 +83,12 @@ class PhotoCard extends Component {
   }
 
   onRefresh = async () => {
-    // const resUsers = await API.getUsers_API();
+    
     const { unlikes, user, likes } = this.props;
     const resUsers = await API.getUsersNearby_API(
       { long: this.state.longitude, lat: this.state.latitude },
       user.distance
     );
-
 
     let users = [];
 
@@ -100,9 +100,6 @@ class PhotoCard extends Component {
           this.props.unlikes.filter(unlike => unlike.uid == item.uid).length ==
           0
       );
-
-      console.log('length', users.length, likes.length, unlikes.length)
-
 
       users = users.filter(
         item =>
@@ -138,12 +135,14 @@ class PhotoCard extends Component {
     const { users } = this.state;
 
     await like(user.uid, person, false);
-    checkMatch(user.uid, person);
 
-    // let updUsers = users.filter(
-    //   item =>
-    //     this.props.likes.filter(like => like.uid != item.uid).length == 0
-    // );
+    const resCheck = await checkMatch(user.uid, person);
+    let matched = false;
+    if (resCheck.type == ActionType.UPDATE_MATCH_OK) {
+      matched = true;
+      this.setState({ matched, loading: false });
+      return;
+    }
 
     let updUsers = users.filter(item => item.uid != person.uid);
 
@@ -157,7 +156,29 @@ class PhotoCard extends Component {
       }
     }
 
-    this.setState({ users: updUsers, images, loading: false });
+    this.setState({ users: updUsers, images, matched, loading: false });
+  };
+
+  onPrevious = async person => {
+    this.setState({ loading: true });
+
+    const { users } = this.state;
+    let updUsers = users.filter(item => item.uid != person.uid);
+
+    let updPerson = Array.isArray(updUsers) && updUsers[0];
+    let images = null;
+    if (updPerson) {
+      const res = await API.getImages_API(updPerson.uid);
+      if (res.status) {
+        //const images = res.data;
+        images = res.data.filter(image => image.uri != "");
+      }
+    }
+    this.setState({ users: updUsers, matched: false, loading: false });
+  };
+
+  onMessage = async person => {
+    this.props.navigation.navigate("ChatList");
   };
 
   onUnLike = async person => {
@@ -226,15 +247,225 @@ class PhotoCard extends Component {
     );
   };
 
+  renderExpand = (person, isPerson, images) => {
+    return (
+      <View style={styles.body}>
+        <ScrollView style={{ flex: 1 }}>
+          <Text style={styles.nameText}>
+            {person.name} {person.age}
+          </Text>
+          <Text style={styles.address}>{person.address}</Text>
+          <Text style={styles.church}>{person.church}</Text>
+          <Text style={styles.desc}>{person.aboutMe}</Text>
+
+          <View>
+            <Text style={styles.photo}>Photos</Text>
+          </View>
+
+          <View style={{ marginBottom: 25 }}>
+            <Swiper
+              width={width}
+              height={
+                Platform.OS === "ios"
+                  ? (width / 3 - 5) * 2
+                  : (width / 3 + 14) * 2
+              }
+              paginationStyle={styles.swiperPaginationStyle}
+              dot={
+                <View
+                  style={[
+                    styles.thumbnailDot,
+                    {
+                      backgroundColor: "rgba(0,0,0,0.3)"
+                    }
+                  ]}
+                />
+              }
+              activeDot={
+                <View
+                  style={[
+                    styles.thumbnailDot,
+                    { backgroundColor: commonColor.brandPrimary }
+                  ]}
+                />
+              }
+              loop={false}
+            >
+              <View style={styles.instagramCarouselView}>
+                {Array.isArray(images) ? (
+                  images.map((image, i) => {
+                    return (
+                      <Image
+                        key={i}
+                        style={styles.thumbnail}
+                        source={{ uri: image.uri }}
+                        resizeMode="contain"
+                      />
+                    );
+                  })
+                ) : (
+                  <React.Fragment />
+                )}
+              </View>
+            </Swiper>
+          </View>
+
+          <View style={styles.buttons}>
+            {isPerson ? (
+              <Button
+                block
+                rounded
+                style={[styles.button, { width: 160 }]}
+                onPress={this.onMessage.bind(this, person)}
+              >
+                <Text style={styles.buttonText}>MESSAGE</Text>
+              </Button>
+            ) : (
+              <React.Fragment>
+                <TouchableOpacity onPress={this.onUnLike.bind(this, person)}>
+                  <Image
+                    source={require("../../../assets/Pass_Button.png")}
+                    style={styles.close}
+                  />
+                </TouchableOpacity>
+                <Button
+                  block
+                  rounded
+                  style={styles.button}
+                  onPress={this.onLike.bind(this, person)}
+                >
+                  <Text style={styles.buttonText}>LIKE</Text>
+                </Button>
+              </React.Fragment>
+            )}
+          </View>
+
+          <View style={styles.collapse}>
+            <TouchableOpacity onPress={this.changeStage}>
+              <Icon
+                name="arrow-collapse-down"
+                type="MaterialCommunityIcons"
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+
+  renderCollapse = (person, isPerson) => {
+    return (
+      <View>
+        <View style={[styles.body, { height: 220 }]}>
+          <Text style={styles.nameText}>
+            {person.name} {person.age}
+          </Text>
+          <Text style={styles.address}>{person.address}</Text>
+          <Text style={styles.church}>{person.church}</Text>
+
+          <View style={styles.buttons}>
+            {isPerson ? (
+              <Button
+                block
+                rounded
+                style={[styles.button, { width: 160 }]}
+                onPress={this.onMessage.bind(this, person)}
+              >
+                <Text style={styles.buttonText}>MESSAGE</Text>
+              </Button>
+            ) : (
+              <React.Fragment>
+                <TouchableOpacity onPress={this.onUnLike.bind(this, person)}>
+                  <Image
+                    source={require("../../../assets/Pass_Button.png")}
+                    style={styles.close}
+                  />
+                </TouchableOpacity>
+                <Button
+                  block
+                  rounded
+                  style={styles.button}
+                  onPress={this.onLike.bind(this, person)}
+                >
+                  <Text style={styles.buttonText}>LIKE</Text>
+                </Button>
+              </React.Fragment>
+            )}
+          </View>
+          <View style={styles.collapse}>
+            <TouchableOpacity onPress={this.changeStage}>
+              <Icon
+                name="arrow-collapse-down"
+                type="MaterialCommunityIcons"
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  renderMatched = person => {
+    return (
+      <View>
+        <View style={[styles.bodyMatched, { height: 275 }]}>
+          <Text style={styles.nameText}>
+            {person.name} {person.age}
+          </Text>
+          <Text style={styles.address}>{person.address}</Text>
+          <Text style={styles.church}>{person.church}</Text>
+
+          <View style={styles.buttonsMatched}>
+            <Button
+              block
+              rounded
+              style={[styles.button, { width: 150, borderColor: "#bdbfbf" }]}
+              onPress={this.onPrevious.bind(this, person)}
+            >
+              <Text style={[styles.buttonText, { color: "#bdbfbf" }]}>
+                LATER
+              </Text>
+            </Button>
+
+            <Button
+              block
+              rounded
+              style={[styles.button, { width: 150 }]}
+              onPress={this.onMessage.bind(this, person)}
+            >
+              <Text style={styles.buttonText}>MESSAGE</Text>
+            </Button>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   render() {
-    const { users } = this.state;
-
     const navigation = this.props.navigation;
-    if (this.state.loading) return <Spinner />;
+    const { users } = this.state;
+    let person = null;
+    let images = []
+    let isPerson = false;
 
-    if (users.length == 0) return this.renderNoUser();
+    const personParam = this.props.navigation.getParam("person", null);
+    const imagesParam = this.props.navigation.getParam("images", null);
 
-    let person = users[0];
+    //console.log("personParam", personParam);
+
+    if (personParam) {
+      person = personParam;
+      isPerson = true;
+      images = imagesParam
+    } else {
+      if (this.state.loading) return <Spinner />;
+      if (users.length == 0) return this.renderNoUser();
+      person = users[0];
+      images = this.state.images
+    }
+
     return (
       <Container style={styles.wrapper}>
         <View style={styles.instagramPhotosCarousel}>
@@ -285,132 +516,11 @@ class PhotoCard extends Component {
           </Swiper>
         </View>
 
-        {this.state.expand ? (
-          <View style={styles.body} onPress={this.changeStage}>
-            <ScrollView style={{ flex: 1 }}>
-              <Text style={styles.nameText}>
-                {person.name} {person.age}
-              </Text>
-              <Text style={styles.address}>{person.address}</Text>
-              <Text style={styles.church}>{person.church}</Text>
-              <Text style={styles.desc}>{person.aboutMe}</Text>
-
-              <View>
-                <Text style={styles.photo}>Photos</Text>
-              </View>
-
-              <View style={{ marginBottom: 25 }}>
-                <Swiper
-                  width={width}
-                  height={
-                    Platform.OS === "ios"
-                      ? (width / 3 - 5) * 2
-                      : (width / 3 + 14) * 2
-                  }
-                  paginationStyle={styles.swiperPaginationStyle}
-                  dot={
-                    <View
-                      style={[
-                        styles.thumbnailDot,
-                        {
-                          backgroundColor: "rgba(0,0,0,0.3)"
-                        }
-                      ]}
-                    />
-                  }
-                  activeDot={
-                    <View
-                      style={[
-                        styles.thumbnailDot,
-                        { backgroundColor: commonColor.brandPrimary }
-                      ]}
-                    />
-                  }
-                  loop={false}
-                >
-                  <View style={styles.instagramCarouselView}>
-                    {Array.isArray(this.state.images) ? (
-                      this.state.images.map((image, i) => {
-                        return (
-                          <Image
-                            key={i}
-                            style={styles.thumbnail}
-                            source={{ uri: image.uri }}
-                            resizeMode="contain"
-                          />
-                        );
-                      })
-                    ) : (
-                      <React.Fragment />
-                    )}
-                  </View>
-                </Swiper>
-              </View>
-
-              <View style={styles.buttons}>
-                <TouchableOpacity onPress={this.onUnLike.bind(this, person)}>
-                  <Image
-                    source={require("../../../assets/Pass_Button.png")}
-                    style={styles.close}
-                  />
-                </TouchableOpacity>
-                <Button
-                  block
-                  rounded
-                  style={styles.button}
-                  onPress={this.onLike.bind(this, person)}
-                >
-                  <Text style={styles.buttonText}>LIKE</Text>
-                </Button>
-              </View>
-              <View style={styles.collapse}>
-                <TouchableOpacity onPress={this.changeStage}>
-                  <Icon
-                    name="arrow-collapse-down"
-                    type="MaterialCommunityIcons"
-                    style={styles.icon}
-                  />
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        ) : (
-          <View onPress={this.changeStage}>
-            <View style={[styles.body, { height: 220 }]}>
-              <Text style={styles.nameText}>
-                {person.name} {person.age}
-              </Text>
-              <Text style={styles.address}>{person.address}</Text>
-              <Text style={styles.church}>{person.church}</Text>
-
-              <View style={styles.buttons}>
-                <TouchableOpacity onPress={this.onUnLike.bind(this, person)}>
-                  <Image
-                    source={require("../../../assets/Pass_Button.png")}
-                    style={styles.close}
-                  />
-                </TouchableOpacity>
-                <Button
-                  block
-                  rounded
-                  style={styles.button}
-                  onPress={this.onLike.bind(this, person)}
-                >
-                  <Text style={styles.buttonText}>LIKE</Text>
-                </Button>
-              </View>
-              <View style={styles.collapse}>
-                <TouchableOpacity onPress={this.changeStage}>
-                  <Icon
-                    name="arrow-collapse-down"
-                    type="MaterialCommunityIcons"
-                    style={styles.icon}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
+        {this.state.matched
+          ? this.renderMatched(person)
+          : this.state.expand
+            ? this.renderExpand(person, isPerson, images)
+            : this.renderCollapse(person, isPerson)}
       </Container>
     );
   }
