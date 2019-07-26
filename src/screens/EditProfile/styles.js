@@ -383,8 +383,6 @@ export default {
     alignSelf: 'center'
   },
   desc: {
-    marginTop: 10,
-    height: 45,
     color: "#404040",
     fontFamily: "Lato",
     fontSize: 12,
@@ -413,8 +411,8 @@ export default {
     color: commonColor.lightTextColor
   },
   textView: {
-    backgroundColor: "white",
-    padding: 10
+    backgroundColor: "f2f2f2",
+    paddingVertical: 10
   },
   radiobuttonView: {
     paddingVertical: 5,
@@ -425,5 +423,20 @@ export default {
   },
   switchBlockHeader: {
     color: commonColor.contentTextColor
+  },
+  church: {
+    height: 13,
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 10,
+    fontWeight: "400",
+    letterSpacing: 0.05
+  },
+  tapText:{
+    height: 11,
+color: '#bdbfbf',
+fontFamily: 'Lato',
+fontSize: 10,
+fontWeight: '400',
   }
 };

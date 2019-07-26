@@ -4,7 +4,9 @@ import {
   ImageBackground,
   View,
   TouchableOpacity,
-  Platform
+  Platform,
+  ScrollView,
+  TextInput
 } from "react-native";
 import {
   Container,
@@ -42,59 +44,40 @@ class EditProfile extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      direction: null,
-      opac: 0,
-      users: [],
       loading: false,
-      expand: true,
 
       imageMain: "",
       images: []
     };
   }
 
-  _getLocationAsync = async () => {
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status !== "granted") {
-      this.setState({
-        locationResult: "Permission to access location was denied"
-      });
-    } else {
-      this.setState({ hasLocationPermissions: true });
+  async componentDidMount() {
+    this.setState({ loading: true });
+    const { user } = this.props;
+    let images = null;
+    if (user) {
+      const res = await API.getImages_API(user.uid);
+      if (res.status) {
+        images = res.data.filter(image => image.uri != "");
+      }
     }
 
-    let location = await Location.getCurrentPositionAsync({});
-    // console.log('location',   //longitude)
-
-    this.props.updateUser(this.props.user.uid, {
-      lat: location.coords.latitude,
-      long: location.coords.longitude
-    });
-
-    return location;
-  };
-
-  async componentDidMount() {
-    //this.setState({ loading: true });
-
-    this.getPermissionAsync();
-    await this.props.getImages(this.props.user.uid);
-
-    this.refresh();
+    this.setState({ images, loading: false, aboutMe: user.aboutMe, imageMain: user.image });
   }
 
-  refresh = () => {
-    const { user, images } = this.props;
-    this.setState({
-      radioToggleMale: user.gender == "male",
-      radioToggleFemale: user.gender == "female",
-      aboutMe: user.aboutMe,
-      age: user.age,
-      school: user.college,
-      images: images,
-      imageMain: user.image
-    });
-  };
+  refresh = async () => {
+    const { user } = this.props;
+    let images = null;
+    if (user) {
+      const res = await API.getImages_API(user.uid);
+      if (res.status) {
+        images = res.data.filter(image => image.uri != "");
+      }
+    }
+    this.setState({ images, imageMain: user.image });
+
+   
+  }
 
   getPermissionAsync = async () => {
     if (Constants.platform.ios) {
@@ -130,6 +113,7 @@ class EditProfile extends Component {
   };
 
   onDeleteImage = async name => {
+    this.setState({ loading: true });
     const { user } = this.props;
 
     const res = await API.deleteImage(user.uid, name);
@@ -140,50 +124,144 @@ class EditProfile extends Component {
       await this.props.updateUserImages(user.uid, name, "");
     }
     this.refresh();
-    console.log(res);
+    // console.log(res);
+    this.setState({ loading: false });
   };
 
   onSave = async () => {
-    const {
-      radioToggleMale,
-      radioToggleFemale,
-      aboutMe,
-      age,
-      school
-    } = this.state;
+    const { aboutMe } = this.state;
     const { updateUser, user } = this.props;
 
     const updObj = {
-      gender: radioToggleMale ? "male" : "female",
-      aboutMe,
-      age,
-      college: school
+      aboutMe
     };
 
     res = await updateUser(user.uid, updObj);
 
     //success('Settings has been saved')
 
-    if (res.type == ActionType.UPDATE_USER_OK)
+    if (res.type == ActionType.UPDATE_USER_OK) {
       success("Profile has been saved");
-    else alert("There is an unexpected error, please try again!");
+      this.props.navigation.navigate("Profile");
+    } else alert("There is an unexpected error, please try again!");
   };
 
-  changeStage = () => {
-    console.log("expand", this.state.expand);
-    this.setState({
-      expand: !this.state.expand
-    });
+  renderExpand = (person, isPerson, images) => {
+    return (
+      <View style={styles.body}>
+        <ScrollView style={{ flex: 1 }}>
+          <Text style={styles.nameText}>
+            {person.name} {person.age}
+          </Text>
+          <Text style={styles.address}>{person.address}</Text>
+          <Text style={styles.church}>{person.church}</Text>
 
-    console.log("expand", this.state.expand);
+          <View style={styles.textView}>
+            <Text style={styles.tapText}>TAP TO TYPE</Text>
+            <View style={{ marginLeft: 0 }}>
+              <TextInput
+                multiline={true}
+                placeholder="About you . . ."
+                onChangeText={aboutMe => this.setState({ aboutMe })}
+                maxLength={500}
+                numberOfLines={6}
+                style={[
+                  {
+                    height: 40,
+                    textAlignVertical: "top"
+                  },
+                  styles.desc
+                ]}
+                underlineColorAndroid={"transparent"}
+                value={this.state.aboutMe}
+              />
+            </View>
+          </View>
+
+          <View>
+            <Text style={styles.photo}>Photos</Text>
+          </View>
+
+          <View style={{ marginBottom: 25 }}>
+            <Swiper
+              width={width}
+              height={
+                Platform.OS === "ios"
+                  ? (width / 3 - 5) * 2
+                  : (width / 3 + 14) * 2
+              }
+              paginationStyle={styles.swiperPaginationStyle}
+              dot={
+                <View
+                  style={[
+                    styles.thumbnailDot,
+                    {
+                      backgroundColor: "rgba(0,0,0,0.3)"
+                    }
+                  ]}
+                />
+              }
+              activeDot={
+                <View
+                  style={[
+                    styles.thumbnailDot,
+                    { backgroundColor: commonColor.brandPrimary }
+                  ]}
+                />
+              }
+              loop={false}
+            >
+              <View style={styles.instagramCarouselView}>
+                {Array.isArray(images) ? (
+                  images.map((image, i) => {
+                    return (
+                      <Image
+                        key={i}
+                        style={styles.thumbnail}
+                        source={{ uri: image.uri }}
+                        resizeMode="contain"
+                      />
+                    );
+                  })
+                ) : (
+                  <React.Fragment />
+                )}
+              </View>
+            </Swiper>
+          </View>
+
+          <View style={styles.buttons}>
+            <React.Fragment>
+              <TouchableOpacity
+                onPress={() => this.props.navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../../../assets/Pass_Button.png")}
+                  style={styles.close}
+                />
+              </TouchableOpacity>
+              <Button block rounded style={styles.button} onPress={this.onSave}>
+                <Text style={styles.buttonText}>SAVE</Text>
+              </Button>
+            </React.Fragment>
+          </View>
+
+          <View style={styles.collapse}>
+            <TouchableOpacity onPress={this.changeStage}>
+              <Icon
+                name="arrow-collapse-down"
+                type="MaterialCommunityIcons"
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    );
   };
 
   render() {
-    //return this.renderNoUser();
-
-    const { users } = this.state;
     const { person, user } = this.props;
-    //const data1 = users.filter(item => item.uid != null);
 
     if (this.state.loading) return <Spinner />;
 
@@ -296,89 +374,9 @@ class EditProfile extends Component {
               </View>
             </View> */}
           </View>
-          </Content>
-          <View>
-            <View style={styles.body}>
-              <Text style={styles.nameText}>{user.name} 23</Text>
-              <Text style={styles.address}>Manhattan, New York</Text>
-              <Text style={styles.church}>St. Mary & St. Mark Church</Text>
-              <Text style={styles.desc}>
-                This is a concept of a dating app specifically targeting the
-                Coptic Orthodox community. I’m not sure what else to type here,
-                trying to fill this up as much as I can.
-              </Text>
+        </Content>
 
-              <View>
-                <Text style={styles.photo}>Photos</Text>
-              </View>
-              <View>
-                <Swiper
-                  width={width}
-                  height={
-                    Platform.OS === "ios"
-                      ? (width / 3 - 5) * 2
-                      : (width / 3 + 14) * 2
-                  }
-                  paginationStyle={styles.swiperPaginationStyle}
-                  dot={
-                    <View
-                      style={[
-                        styles.thumbnailDot,
-                        {
-                          backgroundColor: "rgba(0,0,0,0.3)"
-                        }
-                      ]}
-                    />
-                  }
-                  activeDot={
-                    <View
-                      style={[
-                        styles.thumbnailDot,
-                        { backgroundColor: commonColor.brandPrimary }
-                      ]}
-                    />
-                  }
-                  loop={false}
-                >
-                  <View style={styles.instagramCarouselView}>
-                    {Array.isArray(this.state.images) ? (
-                      this.state.images.map(image => {
-                        return (
-                          <Image
-                            style={styles.thumbnail}
-                            source={{ uri: image.uri }}
-                            resizeMode="contain"
-                          />
-                        );
-                      })
-                    ) : (
-                      <React.Fragment />
-                    )}
-                  </View>
-                </Swiper>
-              </View>
-
-              <View style={styles.buttons}>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("Settings")}
-                >
-                  <Image
-                    source={require("../../../assets/setting.png")}
-                    style={styles.close}
-                  />
-                </TouchableOpacity>
-                <Button
-                  block
-                  rounded
-                  style={styles.button}
-                  onPress={() => navigation.navigate("EditProfile")}
-                >
-                  <Text style={styles.buttonText}>EDIT</Text>
-                </Button>
-              </View>
-            </View>
-          </View>
-        
+        {this.renderExpand(user, false, this.state.images)}
       </Container>
     );
   }

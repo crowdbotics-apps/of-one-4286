@@ -501,18 +501,7 @@ class PhotoCard extends Component {
                 resizeMode="cover"
               />
             </View>
-            {/* <View style={styles.slideView}>
-                <Image
-                  style={styles.image}
-                  source={require("../../../assets/r5.jpg")}
-                />
-              </View>
-              <View style={styles.slideView}>
-                <Image
-                  style={styles.image}
-                  source={require("../../../assets/r1.jpeg")}
-                />
-              </View> */}
+           
           </Swiper>
         </View>
 

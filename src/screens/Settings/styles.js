@@ -408,5 +408,14 @@ export default {
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 15
-  }
+  },
+  church: {
+    height: 13,
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 10,
+    fontWeight: "400",
+    letterSpacing: 0.05,
+    marginBottom: 20,
+  },
 };

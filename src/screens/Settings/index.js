@@ -44,161 +44,19 @@ class Settings extends Component {
       users: [],
       loading: false,
       expand: true,
+
       multiSliderValue: [21, 50]
     };
   }
 
-  _getLocationAsync = async () => {
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status !== "granted") {
-      this.setState({
-        locationResult: "Permission to access location was denied"
-      });
-    } else {
-      this.setState({ hasLocationPermissions: true });
-    }
-
-    let location = await Location.getCurrentPositionAsync({});
-    // console.log('location',   //longitude)
-
-    this.props.updateUser(this.props.user.uid, {
-      lat: location.coords.latitude,
-      long: location.coords.longitude
-    });
-
-    return location;
-  };
 
   async componentDidMount() {
-    this.setState({ loading: true });
-    const location = await this._getLocationAsync();
-    const { latitude, longitude } = location.coords;
+    this.setState({ loading: false });
 
-    const { unlikes, user } = this.props;
-    const resUsers = await API.getUsersNearby_API(
-      { long: longitude, lat: latitude },
-      user.distance
-    );
 
-    let users = [];
-    if (resUsers.status) {
-      users = resUsers.data;
-
-      users = users.filter(
-        item => unlikes.filter(unlike => unlike.uid == item.uid).length == 0
-      );
-
-      if (!user.showMeWomen)
-        users = users.filter(item => item.gender != "female");
-
-      if (!user.showMeMen) users = users.filter(item => item.gender != "male");
-
-      // console.log('users ',users)
-
-      const { getPerson } = this.props;
-      await getPerson(users[0].uid);
-
-      this.setState({ users, loading: false, longitude, latitude });
-    }
+    
   }
 
-  onRefresh = async () => {
-    // const resUsers = await API.getUsers_API();
-    const { unlikes, user } = this.props;
-    const resUsers = await API.getUsersNearby_API(
-      { long: this.state.longitude, lat: this.state.latitude },
-      user.distance
-    );
-
-    let users = [];
-    if (resUsers.status) {
-      users = resUsers.data;
-
-      users = users.filter(
-        item =>
-          this.props.unlikes.filter(unlike => unlike.uid == item.uid).length ==
-          0
-      );
-
-      if (!user.showMeWomen)
-        users = users.filter(item => item.gender != "female");
-
-      if (!user.showMeMen) users = users.filter(item => item.gender != "male");
-
-      console.log("users", users, this.props.unlikes);
-      if (Array.isArray(users) && users.length > 0) {
-        this._deckSwiper._root.setState({
-          lastCard: false,
-          card1Top: true,
-          card2Top: true,
-          disabled: false,
-          selectedItem: users[0]
-          //selectedItem2: users[1]
-        });
-
-        this.setState({ users });
-      }
-    }
-  };
-
-  onLike = async person => {
-    const { user, like, checkMatch } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
-
-    await like(user.uid, selectedItem, false);
-    checkMatch(user.uid, selectedItem);
-    this._deckSwiper._root.swipeRight();
-  };
-
-  onUnLike = async person => {
-    const { user, unlike } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
-
-    unlike(user.uid, selectedItem);
-    this._deckSwiper._root.swipeLeft();
-  };
-
-  onSuperLike = async () => {
-    const { user, like, checkMatch } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
-
-    await like(user.uid, selectedItem, true);
-    checkMatch(user.uid, selectedItem);
-    this._deckSwiper._root.swipeRight();
-
-    // const navigation = this.props.navigation;
-    // navigation.navigate("PhotoCardDetails")
-  };
-
-  onSwiping = async (dir, opa) => {
-    // const { user, unlike, like } = this.props;
-    // const { selectedItem2 } = this._deckSwiper._root.state;
-
-    // console.log('user', user)
-
-    this.setState({ direction: dir, opac: opa });
-
-    // if (dir == "left") {
-    //   unlike(user.uid, selectedItem2);
-    // } else {
-    //   like(user.uid, selectedItem2, false);
-    // }
-  };
-
-  onSwipeRight = async () => {
-    const { user, like, checkMatch } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
-
-    await like(user.uid, selectedItem, false);
-    checkMatch(user.uid, selectedItem);
-  };
-
-  onSwipeLeft = async () => {
-    const { user, unlike } = this.props;
-    const { selectedItem } = this._deckSwiper._root.state;
-
-    unlike(user.uid, selectedItem);
-  };
 
   multiSliderValuesChange = values => {
     this.setState({
@@ -215,48 +73,21 @@ class Settings extends Component {
     console.log("expand", this.state.expand);
   };
 
-  renderNoUser = () => {
-    return (
-      <Container style={styles.wrapp}>
-        <View style={styles.bodyNoUser}>
-          <Image
-            style={styles.warningIcon}
-            source={require("../../../assets/warning.png")}
-            ResizeMode="contain"
-          />
-          <Text style={styles.textNoUser}>
-            We ran into a problem loading people, sorry about that.
-          </Text>
-          <Button
-            block
-            rounded
-            style={styles.buttonTryAgain}
-            onPress={this.onPrevious}
-          >
-            <Text style={styles.buttonText}>TRY AGAIN</Text>
-          </Button>
-        </View>
-      </Container>
-    );
-  };
 
   render() {
-    //return this.renderNoUser();
-
-    const { users } = this.state;
-    const { person, user } = this.props;
-    //const data1 = users.filter(item => item.uid != null);
+ 
+    const { user } = this.props;
+   
 
     const navigation = this.props.navigation;
     if (this.state.loading) return <Spinner />;
 
-    // if (users.length < 2) return <Text>No user found.</Text>;
 
-    if (!person) return <Spinner />;
+
 
     return (
       <ImageBackground
-        //source={require("../../../assets/background.png")}
+
         source={
           user.image == ""
             ? require("../../../assets/launchscreen.png")
@@ -321,8 +152,8 @@ class Settings extends Component {
                 <Text style={styles.label}>Visibility</Text>
                 <Text style={styles.text}>Visible</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.group}>
-                <Text style={styles.label}>Help Support</Text>
+              <TouchableOpacity style={styles.group} >
+                <Text style={styles.label}>Instagram</Text>
                 <Text style={styles.text}>Connected</Text>
               </TouchableOpacity>
 
@@ -372,7 +203,7 @@ class Settings extends Component {
                   block
                   rounded
                   style={styles.button}
-                  onPress={() => navigation.navigate("EditProfile")}
+                  onPress={() => navigation.navigate("Profile")}
                 >
                   <Text style={styles.buttonText}>DONE</Text>
                 </Button>

@@ -310,7 +310,7 @@ export default {
   },
   body: {
     width: width,
-    height: height / 1.5,
+    height: height / 2,
     shadowColor: "rgba(0, 0, 0, 0.5)",
     shadowOffset: { width: 2, height: 0 },
     shadowRadius: 16,

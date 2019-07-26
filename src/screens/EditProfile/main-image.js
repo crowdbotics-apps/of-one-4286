@@ -45,7 +45,8 @@ const styles = {
     borderRadius: 4
   },
   addButtonLayout: {
-    backgroundColor: commonColor.brandPrimary,
+    //backgroundColor: commonColor.brandPrimary,
+    backgroundColor: '#bdbfbf',
     height: 25,
     width: 25,
     borderRadius: 12.5,
@@ -63,7 +64,8 @@ const styles = {
   },
   icon: {
     color: "white",
-    fontSize: 15
+    fontSize: 15,
+    
   }
 };
 

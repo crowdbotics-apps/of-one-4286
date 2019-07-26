@@ -175,13 +175,6 @@ export default {
     fontSize: 12,
     fontWeight: "400"
   },
-  church: {
-    height: 15,
-    color: "#404040",
-    fontFamily: "Lato",
-    fontSize: 12,
-    fontWeight: "400"
-  },
   workingText: {
     color: "rgba(0,0,0,0.75)"
   },
@@ -301,7 +294,7 @@ export default {
   },
   body: {
     width: width,
-    height: height / 1.5,
+    height: height / 2,
     shadowColor: "rgba(0, 0, 0, 0.5)",
     shadowOffset: { width: 2, height: 0 },
     shadowRadius: 16,
@@ -386,5 +379,27 @@ export default {
     fontFamily: "Lato",
     fontSize: 12,
     fontStyle: "italic"
+  },
+  collapse: {
+    position: "absolute",
+    top: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    right: width / 2,
+    zIndex: 1
+  },
+  icon: {
+    height: 60,
+    width: width,
+    color: "#f2f2f2"
+  },
+  church: {
+    height: 13,
+    color: "#bdbfbf",
+    fontFamily: "Lato",
+    fontSize: 10,
+    fontWeight: "400",
+    letterSpacing: 0.05,
+    
   },
 };
